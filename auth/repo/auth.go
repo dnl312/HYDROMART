@@ -44,8 +44,8 @@ func (u *UserRepository) LoginUser(user model.User) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userid": userGet.UserID,
-		"username": userGet.Username,
+		"user_id": userGet.UserID,
+		"email": userGet.Email,
 		"role": userGet.Role,
 		"exp" : jwt.TimeFunc().Add(time.Hour * 72).Unix(),
 	})
@@ -88,7 +88,11 @@ func (u UserRepository) RegisterUser(user model.RegisterUser) error {
 	newUser := model.User{
 		UserID:       uuid.New().String(),
 		Username: user.Username,
+		Email:        user.Email,
 		Password: string(hashedPassword),
+		Address: user.Address,
+		Role: user.Role,
+		Deposit: 0,
 	}
 
 	if err := config.DB.Table("users_hydromart").Create(&newUser).Error; err != nil {
