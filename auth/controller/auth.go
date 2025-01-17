@@ -29,7 +29,12 @@ func (s *Server) LoginUser(ctx context.Context, req *pb.LoginRequest) (*pb.Login
 
 func (s *Server) RegisterUser(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	
-	err := s.Repository.RegisterUser(model.RegisterUser{Username: req.Username, Password:  req.Password})
+	err := s.Repository.RegisterUser(model.RegisterUser{
+		Username: req.Username, 
+		Email: req.Email,
+		Password:  req.Password,
+		Address: req.Address,
+		Role: req.Role,})
 	if err != nil {
 		return nil, err
 	}

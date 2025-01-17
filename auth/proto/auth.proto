@@ -5,8 +5,8 @@ package auth;
 option go_package = "/pb;pb";
 
 service AuthService {
-    rpc Login(LoginRequest) returns (LoginResponse) {}
-    rpc Register(RegisterRequest) returns (RegisterResponse) {}
+    rpc LoginUser(LoginRequest) returns (LoginResponse) {}
+    rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {}
 }
 
 message LoginRequest {
