@@ -88,7 +88,11 @@ func (u UserRepository) RegisterUser(user model.RegisterUser) error {
 	newUser := model.User{
 		UserID:       uuid.New().String(),
 		Username: user.Username,
+		Email:        user.Email,
 		Password: string(hashedPassword),
+		Address: user.Address,
+		Role: user.Role,
+		Deposit: 0,
 	}
 
 	if err := config.DB.Table("users_hydromart").Create(&newUser).Error; err != nil {
