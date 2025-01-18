@@ -1,7 +1,7 @@
 package config
 
 import (
-	"client/pb"
+	pb "client/pb/authpb"
 	"log"
 	"os"
 
