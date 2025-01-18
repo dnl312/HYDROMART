@@ -24,8 +24,8 @@ func main() {
 	config.ClearPreparedStatements()
 	log.Printf("Connected to database")
 	defer config.CloseDB()
-	bookRepository := repo.NewMerchantRepository(db)
-	bookController := controller.NewMerchantController(&bookRepository)
+	merchantRepository := repo.NewMerchantRepository(db)
+	merchantController := controller.NewMerchantController(&merchantRepository)
 
-	config.ListenAndServeGrpc(&bookController)
+	config.ListenAndServeGrpc(&merchantController)
 }
