@@ -15,11 +15,12 @@ func Echo(e *echo.Echo, uc controller.AuthController, mc controller.MerchantCont
 
 	merchants := e.Group("/merchants")
 	{
-		merchants.GET("/products", mc.ShowAllProduct)
+		merchants.GET("/products", mc.ShowAllProducts)
 		merchants.POST("/products", mc.AddProduct)
-		// merchants.PUT("/products/:id", mc.UpdateProduct)
-		// merchants.DELETE("/products/:id", mc.UpdateProduct)
-		// merchants.GET("/transactions", mc.ShowTransactions)
+		merchants.PUT("/products/:id", mc.UpdateProduct)
+		merchants.DELETE("/products/:id", mc.UpdateProduct)
+		// merchants.GET("/orders", mc.ShowAllOrders)
+		// merchants.POST("/orders/:id", mc.UpdateOrder)
 	}
 
 }

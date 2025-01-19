@@ -1,7 +1,7 @@
 package model
 
 type ShowAllProductRequest struct {
-	MerchantId string
+	MerchantId string `json:"merchant_id" validate:"required,merchant_id"`
 }
 
 type ShowAllProductResponse struct {

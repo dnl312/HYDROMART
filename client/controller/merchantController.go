@@ -11,6 +11,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"google.golang.org/grpc/metadata"
 )
 
 type MerchantController struct {
@@ -31,18 +32,23 @@ type jwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (u MerchantController) ShowAllProduct(ctx echo.Context) error {
-	token := ctx.Get("Authorization").(*jwt.Token)
-	claims := token.Claims.(*jwtCustomClaims)
+func (mc MerchantController) ShowAllProducts(ctx echo.Context) error {
+	token := ctx.Request().Header.Get("Authorization")
+	md := metadata.Pairs("Authorization", token)
+	ctxWithToken := metadata.NewOutgoingContext(context.Background(), md)
 
-	if claims.Role != "merchant" {
-		return ctx.JSON(http.StatusUnauthorized, "unauthorized")
-	}
-
-	serviceCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	serviceCtx, cancel := context.WithTimeout(ctxWithToken, 10*time.Second)
 	defer cancel()
 
-	r, err := u.Client.ShowAllProduct(serviceCtx, &pb.ShowAllProductRequest{MerchantId: claims.ID})
+	// user, err := helpers.GetUserIDFromToken(ctx)
+	// if err != nil {
+	// 	return ctx.JSON(http.StatusBadRequest, "not okay")
+	// }
+	// if user.Role != "merchant" {
+	// 	return ctx.JSON(http.StatusUnauthorized, "user is not merchant")
+	// }
+
+	r, err := mc.Client.ShowAllProducts(serviceCtx, &pb.ShowAllProductRequest{MerchantId: ""})
 	if err != nil {
 		log.Printf("could not show all product: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "show all product error"})
@@ -52,7 +58,7 @@ func (u MerchantController) ShowAllProduct(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, r)
 }
 
-func (u MerchantController) AddProduct(ctx echo.Context) error {
+func (mc MerchantController) AddProduct(ctx echo.Context) error {
 	var req model.Product
 	if ctx.Bind(&req) != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid JSON request")
@@ -77,7 +83,7 @@ func (u MerchantController) AddProduct(ctx echo.Context) error {
 		Category:   req.Category,
 	}
 
-	r, err := u.Client.AddProduct(serviceCtx, &pb.AddProductRequest{
+	r, err := mc.Client.AddProduct(serviceCtx, &pb.AddProductRequest{
 		MerchantId: claims.ID,
 		Product:    &product,
 	})
@@ -90,7 +96,7 @@ func (u MerchantController) AddProduct(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, r)
 }
 
-func (u MerchantController) UpdateProduct(ctx echo.Context) error {
+func (mc MerchantController) UpdateProduct(ctx echo.Context) error {
 	var req model.Product
 	if ctx.Bind(&req) != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid JSON request")
@@ -115,7 +121,7 @@ func (u MerchantController) UpdateProduct(ctx echo.Context) error {
 		Category:   req.Category,
 	}
 
-	r, err := u.Client.UpdateProduct(serviceCtx, &pb.UpdateProductRequest{
+	r, err := mc.Client.UpdateProduct(serviceCtx, &pb.UpdateProductRequest{
 		MerchantId: claims.ID,
 		Product:    &product,
 	})
@@ -128,7 +134,7 @@ func (u MerchantController) UpdateProduct(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, r)
 }
 
-func (u MerchantController) DeleteProduct(ctx echo.Context) error {
+func (mc MerchantController) DeleteProduct(ctx echo.Context) error {
 	var req model.Product
 	if ctx.Bind(&req) != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid JSON request")
@@ -144,7 +150,7 @@ func (u MerchantController) DeleteProduct(ctx echo.Context) error {
 	serviceCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	r, err := u.Client.DeleteProduct(serviceCtx, &pb.DeleteProductRequest{
+	r, err := mc.Client.DeleteProduct(serviceCtx, &pb.DeleteProductRequest{
 		MerchantId: req.MerchantID,
 		ProductId:  req.ProductID,
 	})
@@ -156,3 +162,47 @@ func (u MerchantController) DeleteProduct(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, r)
 }
+
+/*
+func (mc MerchantController) ShowAllOrders(ctx echo.Context) error {
+	token := ctx.Get("Authorization").(*jwt.Token)
+	claims := token.Claims.(*jwtCustomClaims)
+
+	if claims.Role != "merchant" {
+		return ctx.JSON(http.StatusUnauthorized, "unauthorized")
+	}
+
+	serviceCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	r, err := mc.Client.ShowAllOrders(serviceCtx, &pb.ShowAllProductRequest{MerchantId: claims.ID})
+	if err != nil {
+		log.Printf("could not show all product: %v", err)
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "show all product error"})
+	}
+	log.Printf("show all product Response: %v", r)
+
+	return ctx.JSON(http.StatusOK, r)
+}
+
+func (mc MerchantController) UpdateOrder(ctx echo.Context) error {
+	token := ctx.Get("Authorization").(*jwt.Token)
+	claims := token.Claims.(*jwtCustomClaims)
+
+	if claims.Role != "merchant" {
+		return ctx.JSON(http.StatusUnauthorized, "unauthorized")
+	}
+
+	serviceCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	r, err := mc.Client.ShowAllOrders(serviceCtx, &pb.ShowAllProductRequest{MerchantId: claims.ID})
+	if err != nil {
+		log.Printf("could not show all product: %v", err)
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "show all product error"})
+	}
+	log.Printf("show all product Response: %v", r)
+
+	return ctx.JSON(http.StatusOK, r)
+}
+*/

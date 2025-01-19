@@ -18,7 +18,7 @@ func NewMerchantController(r repo.MerchantInterface) Merchant {
 	}
 }
 
-func (s *Merchant) ShowAllProduct(ctx context.Context, req *pb.ShowAllProductRequest) (*pb.ShowAllProductResponse, error) {
+func (s *Merchant) ShowAllProducts(ctx context.Context, req *pb.ShowAllProductRequest) (*pb.ShowAllProductResponse, error) {
 
 	allProduct, err := s.Repository.GetAllProduct(req.MerchantId)
 	if err != nil {

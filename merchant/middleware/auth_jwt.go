@@ -68,7 +68,8 @@ func CustomJWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func GetUserIDFromToken(c echo.Context) (model.User, error) {
-	userToken := c.Get("user")
+
+	userToken := c.Get("User")
 	if userToken == nil {
 		return model.User{}, errors.New("user token is missing from context")
 	}
