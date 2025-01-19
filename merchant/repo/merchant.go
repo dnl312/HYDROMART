@@ -25,3 +25,30 @@ func (u *MerchantRepository) GetAllProduct(merchantID string) (*[]model.Product,
 
 	return &products, nil
 }
+
+func (u *MerchantRepository) AddProduct(productPtr *model.Product) error {
+	result := u.DB.Create(productPtr)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (u *MerchantRepository) UpdateProduct(productPtr *model.Product) error {
+	result := u.DB.Save(productPtr)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (u *MerchantRepository) DeleteProduct(productID string) error {
+	result := u.DB.Delete(&model.Product{}, productID)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
