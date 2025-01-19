@@ -12,7 +12,6 @@ service MerchantService {
 }
 
 message ShowAllProductRequest {
-    string merchant_id = 1;
 }
 
 message ShowAllProductResponse {

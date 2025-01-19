@@ -40,15 +40,7 @@ func (mc MerchantController) ShowAllProducts(ctx echo.Context) error {
 	serviceCtx, cancel := context.WithTimeout(ctxWithToken, 10*time.Second)
 	defer cancel()
 
-	// user, err := helpers.GetUserIDFromToken(ctx)
-	// if err != nil {
-	// 	return ctx.JSON(http.StatusBadRequest, "not okay")
-	// }
-	// if user.Role != "merchant" {
-	// 	return ctx.JSON(http.StatusUnauthorized, "user is not merchant")
-	// }
-
-	r, err := mc.Client.ShowAllProducts(serviceCtx, &pb.ShowAllProductRequest{MerchantId: ""})
+	r, err := mc.Client.ShowAllProducts(serviceCtx, &pb.ShowAllProductRequest{})
 	if err != nil {
 		log.Printf("could not show all product: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "show all product error"})

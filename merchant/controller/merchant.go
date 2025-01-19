@@ -5,6 +5,7 @@ import (
 	"merchant/model"
 	pb "merchant/pb/merchantpb"
 	"merchant/repo"
+	"merchant/utils"
 )
 
 type Merchant struct {
@@ -19,8 +20,17 @@ func NewMerchantController(r repo.MerchantInterface) Merchant {
 }
 
 func (s *Merchant) ShowAllProducts(ctx context.Context, req *pb.ShowAllProductRequest) (*pb.ShowAllProductResponse, error) {
+	tokenString, err := utils.GetTokenStringFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	user, err := utils.RecoverUser(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	merchantID := user["user_id"].(string)
 
-	allProduct, err := s.Repository.GetAllProduct(req.MerchantId)
+	allProduct, err := s.Repository.GetAllProduct(merchantID)
 	if err != nil {
 		return nil, err
 	}
