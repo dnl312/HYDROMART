@@ -16,9 +16,9 @@ func NewMerchantRepository(db *gorm.DB) MerchantRepository {
 	}
 }
 
-func (u *MerchantRepository) GetAllProduct() (*[]model.Product, error) {
+func (u *MerchantRepository) GetAllProduct(merchantID string) (*[]model.Product, error) {
 	var products []model.Product
-	result := u.DB.Find(&products)
+	result := u.DB.Where("merchant_id ?", merchantID).Find(&products)
 	if result.Error != nil {
 		return nil, result.Error
 	}

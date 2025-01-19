@@ -39,7 +39,6 @@ func JWTAuth(ctx context.Context) (context.Context, error) {
 	return nil, status.Error(codes.Unauthenticated, "failed to verify jwt")
 }
 
-
 func CustomJWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		authHeader := c.Request().Header.Get("Authorization")
@@ -87,21 +86,21 @@ func GetUserIDFromToken(c echo.Context) (model.User, error) {
 	// Extract userID
 	user := model.User{
 		UserID: claims["user_id"].(string),
-		Role: claims["role"].(string),
-		Email: claims["email"].(string),
+		Role:   claims["role"].(string),
+		Email:  claims["email"].(string),
 	}
 
 	_, ok = claims["user_id"].(string)
 	if !ok {
-		return model.User{}, errors.New("User ID not found or invalid in token claims")
+		return model.User{}, errors.New("user ID not found or invalid in token claims")
 	}
 	_, ok = claims["role"].(string)
 	if !ok {
-		return model.User{}, errors.New("Role not found or invalid in token claims")
+		return model.User{}, errors.New("role not found or invalid in token claims")
 	}
 	_, ok = claims["email"].(string)
 	if !ok {
-		return model.User{}, errors.New("Email not found or invalid in token claims")
+		return model.User{}, errors.New("email not found or invalid in token claims")
 	}
 
 	return user, nil

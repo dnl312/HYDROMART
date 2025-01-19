@@ -4,5 +4,5 @@ import "merchant/model"
 
 type MerchantInterface interface {
 	// list method
-	GetAllProduct() (*[]model.Product, error)
+	GetAllProduct(string) (*[]model.Product, error)
 }
