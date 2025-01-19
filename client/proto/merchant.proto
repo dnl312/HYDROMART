@@ -6,6 +6,9 @@ option go_package = "/pb;pb";
 
 service MerchantService {
     rpc ShowAllProduct(ShowAllProductRequest) returns (ShowAllProductResponse) {}
+    rpc AddProduct(AddProductRequest) returns (AddProductResponse) {}
+    rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse) {}
+    rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse) {}
 }
 
 message ShowAllProductRequest {
@@ -13,14 +16,41 @@ message ShowAllProductRequest {
 }
 
 message ShowAllProductResponse {
-    repeated ProductResponse products = 1;
+    repeated Product products = 1;
 }
 
-message ProductResponse {
+message Product {
     string  id = 1;
     string  merchant_id = 2;
 	string  name = 3;
-	string price = 4;
+	double price = 4;
 	int32 stock  = 5;
 	string category = 6;
+}
+
+message AddProductRequest {
+    string merchant_id = 1;
+    Product product = 2;
+}
+
+message AddProductResponse {
+    string message = 1;
+}
+
+message UpdateProductRequest {
+    string merchant_id = 1;
+    Product product = 2;
+}
+
+message UpdateProductResponse {
+    string message = 1;
+}
+
+message DeleteProductRequest {
+    string merchant_id = 1;
+    string product_id = 2;
+}
+
+message DeleteProductResponse {
+    string message = 1;
 }

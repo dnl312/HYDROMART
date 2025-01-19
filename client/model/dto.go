@@ -16,16 +16,3 @@ type RegisterUser struct {
 	Address  string `json:"address" validate:"required"`
 	Role     string `json:"role" validate:"required"`
 }
-
-type ShowAllProductResponse struct {
-	Products []ProductResponse
-}
-
-type ProductResponse struct {
-	ProductID  string
-	MerchantId string
-	Name       string
-	Price      string
-	Stock      int
-	Category   string
-}

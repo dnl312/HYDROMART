@@ -16,7 +16,7 @@ func Echo(e *echo.Echo, uc controller.AuthController, mc controller.MerchantCont
 	merchants := e.Group("/merchants")
 	{
 		merchants.GET("/products", mc.ShowAllProduct)
-		// merchants.POST("/products", mc.AddProduct)
+		merchants.POST("/products", mc.AddProduct)
 		// merchants.PUT("/products/:id", mc.UpdateProduct)
 		// merchants.DELETE("/products/:id", mc.UpdateProduct)
 		// merchants.GET("/transactions", mc.ShowTransactions)
