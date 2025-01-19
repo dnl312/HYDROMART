@@ -95,10 +95,8 @@ func (mc MerchantController) UpdateProduct(ctx echo.Context) error {
 	serviceCtx, cancel := context.WithTimeout(ctxWithToken, 10*time.Second)
 	defer cancel()
 
-	productID := ctx.Param("id")
-
 	product := pb.Product{
-		Id:       productID,
+		Id:       ctx.Param("product_id"),
 		Name:     req.ProductName,
 		Price:    req.Price,
 		Stock:    int32(req.Stock),
@@ -118,30 +116,22 @@ func (mc MerchantController) UpdateProduct(ctx echo.Context) error {
 }
 
 func (mc MerchantController) DeleteProduct(ctx echo.Context) error {
-	var req model.Product
-	if ctx.Bind(&req) != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid JSON request")
-	}
 
-	token := ctx.Get("Authorization").(*jwt.Token)
-	claims := token.Claims.(*jwtCustomClaims)
+	token := ctx.Request().Header.Get("Authorization")
+	md := metadata.Pairs("Authorization", token)
+	ctxWithToken := metadata.NewOutgoingContext(context.Background(), md)
 
-	if claims.Role != "merchant" {
-		return ctx.JSON(http.StatusUnauthorized, "unauthorized")
-	}
-
-	serviceCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	serviceCtx, cancel := context.WithTimeout(ctxWithToken, 10*time.Second)
 	defer cancel()
 
 	r, err := mc.Client.DeleteProduct(serviceCtx, &pb.DeleteProductRequest{
-		MerchantId: req.MerchantID,
-		ProductId:  req.ProductID,
+		ProductId: ctx.Param("product_id"),
 	})
 	if err != nil {
-		log.Printf("could not update product: %v", err)
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "update product error"})
+		log.Printf("could not delete product: %v", err)
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "delete product error"})
 	}
-	log.Printf("update product Response: %v", r)
+	log.Printf("update product delete: %v", r)
 
 	return ctx.JSON(http.StatusOK, r)
 }

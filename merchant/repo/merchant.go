@@ -46,7 +46,7 @@ func (u *MerchantRepository) UpdateProduct(productPtr *model.Product) error {
 }
 
 func (u *MerchantRepository) DeleteProduct(productID string) error {
-	result := u.DB.Delete(&model.Product{}, productID)
+	result := u.DB.Where("product_id = ?", productID).Delete(&model.Product{})
 	if result.Error != nil {
 		return result.Error
 	}

@@ -28,8 +28,7 @@ message Product {
 }
 
 message AddProductRequest {
-    string merchant_id = 1;
-    Product product = 2;
+    Product product = 1;
 }
 
 message AddProductResponse {
@@ -37,8 +36,7 @@ message AddProductResponse {
 }
 
 message UpdateProductRequest {
-    string merchant_id = 1;
-    Product product = 2;
+    Product product = 1;
 }
 
 message UpdateProductResponse {
@@ -46,8 +44,7 @@ message UpdateProductResponse {
 }
 
 message DeleteProductRequest {
-    string merchant_id = 1;
-    string product_id = 2;
+    string product_id = 1;
 }
 
 message DeleteProductResponse {
