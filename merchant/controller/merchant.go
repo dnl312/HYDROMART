@@ -21,7 +21,7 @@ func NewMerchantController(r repo.MerchantInterface) Merchant {
 	}
 }
 
-func (s *Merchant) ShowAllProducts(ctx context.Context, req *pb.ShowAllProductRequest) (*pb.ShowAllProductResponse, error) {
+func (m *Merchant) ShowAllProducts(ctx context.Context, req *pb.ShowAllProductRequest) (*pb.ShowAllProductResponse, error) {
 	tokenString, err := utils.GetTokenStringFromContext(ctx)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (s *Merchant) ShowAllProducts(ctx context.Context, req *pb.ShowAllProductRe
 	}
 	merchantID := user["user_id"].(string)
 
-	allProduct, err := s.Repository.GetAllProduct(merchantID)
+	allProduct, err := m.Repository.GetAllProduct(merchantID)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (s *Merchant) ShowAllProducts(ctx context.Context, req *pb.ShowAllProductRe
 	return &allProductResponse, nil
 }
 
-func (s *Merchant) AddProduct(ctx context.Context, req *pb.AddProductRequest) (*pb.AddProductResponse, error) {
+func (m *Merchant) AddProduct(ctx context.Context, req *pb.AddProductRequest) (*pb.AddProductResponse, error) {
 	tokenString, err := utils.GetTokenStringFromContext(ctx)
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (s *Merchant) AddProduct(ctx context.Context, req *pb.AddProductRequest) (*
 		Stock:       int(req.Product.Stock),
 		Category:    req.Product.Category,
 	}
-	err = s.Repository.AddProduct(&product)
+	err = m.Repository.AddProduct(&product)
 	if err != nil {
 		return nil, err
 	}
@@ -84,15 +84,26 @@ func (s *Merchant) AddProduct(ctx context.Context, req *pb.AddProductRequest) (*
 	}, nil
 }
 
-func (s *Merchant) UpdateProduct(ctx context.Context, req *pb.UpdateProductRequest) (*pb.UpdateProductResponse, error) {
+func (m *Merchant) UpdateProduct(ctx context.Context, req *pb.UpdateProductRequest) (*pb.UpdateProductResponse, error) {
+	tokenString, err := utils.GetTokenStringFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	user, err := utils.RecoverUser(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	merchantID := user["user_id"].(string)
+
 	product := model.Product{
-		MerchantID:  req.MerchantId,
+		ProductID:   req.Product.Id,
+		MerchantID:  merchantID,
 		ProductName: req.Product.Name,
 		Price:       req.Product.Price,
 		Stock:       int(req.Product.Stock),
 		Category:    req.Product.Category,
 	}
-	err := s.Repository.UpdateProduct(&product)
+	err = m.Repository.UpdateProduct(&product)
 	if err != nil {
 		return nil, err
 	}
@@ -102,8 +113,8 @@ func (s *Merchant) UpdateProduct(ctx context.Context, req *pb.UpdateProductReque
 	}, nil
 }
 
-func (s *Merchant) DeleteProduct(ctx context.Context, req *pb.DeleteProductRequest) (*pb.DeleteProductResponse, error) {
-	err := s.Repository.DeleteProduct(req.ProductId)
+func (m *Merchant) DeleteProduct(ctx context.Context, req *pb.DeleteProductRequest) (*pb.DeleteProductResponse, error) {
+	err := m.Repository.DeleteProduct(req.ProductId)
 	if err != nil {
 		return nil, err
 	}

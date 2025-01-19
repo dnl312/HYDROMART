@@ -88,28 +88,25 @@ func (mc MerchantController) UpdateProduct(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid JSON request")
 	}
 
-	token := ctx.Get("Authorization").(*jwt.Token)
-	claims := token.Claims.(*jwtCustomClaims)
+	token := ctx.Request().Header.Get("Authorization")
+	md := metadata.Pairs("Authorization", token)
+	ctxWithToken := metadata.NewOutgoingContext(context.Background(), md)
 
-	if claims.Role != "merchant" {
-		return ctx.JSON(http.StatusUnauthorized, "unauthorized")
-	}
-
-	serviceCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	serviceCtx, cancel := context.WithTimeout(ctxWithToken, 10*time.Second)
 	defer cancel()
 
+	productID := ctx.Param("id")
+
 	product := pb.Product{
-		Id:         req.ProductID,
-		MerchantId: req.MerchantID,
-		Name:       req.ProductName,
-		Price:      req.Price,
-		Stock:      int32(req.Stock),
-		Category:   req.Category,
+		Id:       productID,
+		Name:     req.ProductName,
+		Price:    req.Price,
+		Stock:    int32(req.Stock),
+		Category: req.Category,
 	}
 
 	r, err := mc.Client.UpdateProduct(serviceCtx, &pb.UpdateProductRequest{
-		MerchantId: claims.ID,
-		Product:    &product,
+		Product: &product,
 	})
 	if err != nil {
 		log.Printf("could not update product: %v", err)
