@@ -6,6 +6,8 @@ import (
 	pb "merchant/pb/merchantpb"
 	"merchant/repo"
 	"merchant/utils"
+
+	"github.com/google/uuid"
 )
 
 type Merchant struct {
@@ -54,20 +56,31 @@ func (s *Merchant) ShowAllProducts(ctx context.Context, req *pb.ShowAllProductRe
 }
 
 func (s *Merchant) AddProduct(ctx context.Context, req *pb.AddProductRequest) (*pb.AddProductResponse, error) {
+	tokenString, err := utils.GetTokenStringFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	user, err := utils.RecoverUser(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	merchantID := user["user_id"].(string)
+
 	product := model.Product{
-		MerchantID:  req.MerchantId,
+		ProductID:   uuid.New().String(),
+		MerchantID:  merchantID,
 		ProductName: req.Product.Name,
 		Price:       req.Product.Price,
 		Stock:       int(req.Product.Stock),
 		Category:    req.Product.Category,
 	}
-	err := s.Repository.AddProduct(&product)
+	err = s.Repository.AddProduct(&product)
 	if err != nil {
 		return nil, err
 	}
 
 	return &pb.AddProductResponse{
-		Message: "product has been added",
+		Message: "the product has been added",
 	}, nil
 }
 

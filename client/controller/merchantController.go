@@ -51,33 +51,27 @@ func (mc MerchantController) ShowAllProducts(ctx echo.Context) error {
 }
 
 func (mc MerchantController) AddProduct(ctx echo.Context) error {
-	var req model.Product
+	var req model.AddProductRequest
 	if ctx.Bind(&req) != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid JSON request")
 	}
 
-	token := ctx.Get("Authorization").(*jwt.Token)
-	claims := token.Claims.(*jwtCustomClaims)
+	token := ctx.Request().Header.Get("Authorization")
+	md := metadata.Pairs("Authorization", token)
+	ctxWithToken := metadata.NewOutgoingContext(context.Background(), md)
 
-	if claims.Role != "merchant" {
-		return ctx.JSON(http.StatusUnauthorized, "unauthorized")
-	}
-
-	serviceCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	serviceCtx, cancel := context.WithTimeout(ctxWithToken, 10*time.Second)
 	defer cancel()
 
 	product := pb.Product{
-		Id:         req.ProductID,
-		MerchantId: req.MerchantID,
-		Name:       req.ProductName,
-		Price:      req.Price,
-		Stock:      int32(req.Stock),
-		Category:   req.Category,
+		Name:     req.Name,
+		Price:    req.Price,
+		Stock:    int32(req.Stock),
+		Category: req.Category,
 	}
 
 	r, err := mc.Client.AddProduct(serviceCtx, &pb.AddProductRequest{
-		MerchantId: claims.ID,
-		Product:    &product,
+		Product: &product,
 	})
 	if err != nil {
 		log.Printf("could not add product: %v", err)
