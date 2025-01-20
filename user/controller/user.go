@@ -7,6 +7,8 @@ import (
 	"user/pb"
 	"user/repo"
 	"user/utils"
+
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -64,5 +66,34 @@ func (u *User) CreateOrder(ctx context.Context, req *pb.CreateOrderRequest) (*pb
 
 	return &pb.CreateOrderResponse{
 		Message: "Order created successfully",
+	}, nil
+}
+
+func (u *User) DeleteOrder(ctx context.Context, req *pb.DeleteOrderRequest) (*pb.DeleteOrderRequest, error) {
+	token, err := utils.GetTokenStringFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = utils.RecoverUser(token)
+	if err != nil {
+		return nil, err
+	}
+
+	orderID := req.TransactionId
+
+	if orderID == "" {
+		return nil, err
+	}
+
+	err = u.Repository.DeleteOrder(orderID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, err
+		}
+		return nil, err
+	}
+	return &pb.CreateOrderResponse{
+		Message: "Transaction deleted successfully",
 	}, nil
 }
