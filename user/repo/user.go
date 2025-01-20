@@ -32,3 +32,16 @@ func (u *UserRepository) CreateOrder(order *model.Transaction) error {
 	}
 	return nil
 }
+
+func (u *UserRepository) DeleteOrder(orderID string) error {
+	result := u.DB.Where("id = ?", orderID).Delete(&model.Transaction{})
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
+}

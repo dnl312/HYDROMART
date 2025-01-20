@@ -6,4 +6,5 @@ type UserInterface interface {
 	// list method
 	GetProductByID(id string) (*model.Product, error)
 	CreateOrder(order *model.Transaction) error
+	DeleteOrder(orderID string) error
 }
