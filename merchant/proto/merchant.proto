@@ -1,0 +1,52 @@
+syntax =  "proto3";
+
+package merchant;
+
+option go_package = "/pb;pb";
+
+service MerchantService {
+    rpc ShowAllProducts(ShowAllProductRequest) returns (ShowAllProductResponse) {}
+    rpc AddProduct(AddProductRequest) returns (AddProductResponse) {}
+    rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse) {}
+    rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse) {}
+}
+
+message ShowAllProductRequest {
+}
+
+message ShowAllProductResponse {
+    repeated Product products = 1;
+}
+
+message Product {
+    string  id = 1;
+    string  merchant_id = 2;
+	string  name = 3;
+	double price = 4;
+	int32 stock  = 5;
+	string category = 6;
+}
+
+message AddProductRequest {
+    Product product = 1;
+}
+
+message AddProductResponse {
+    string message = 1;
+}
+
+message UpdateProductRequest {
+    Product product = 1;
+}
+
+message UpdateProductResponse {
+    string message = 1;
+}
+
+message DeleteProductRequest {
+    string product_id = 1;
+}
+
+message DeleteProductResponse {
+    string message = 1;
+}

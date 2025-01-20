@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"merchant/middleware"
-	"merchant/pb"
+	pb "merchant/pb/merchantpb"
 	"net"
 	"net/http"
 	"os"
@@ -44,16 +44,15 @@ func AuthInterceptor(ctx context.Context) (context.Context, error) {
 	log.Printf("Metadata received: %v", md)
 
 	authHeader, ok := md["authorization"]
-    if !ok || len(authHeader) == 0 {
-        return nil, status.Errorf(codes.Unauthenticated, "authorization token is not provided")
-    }
+	if !ok || len(authHeader) == 0 {
+		return nil, status.Errorf(codes.Unauthenticated, "authorization token is not provided")
+	}
 
 	token := md["authorization"]
 
 	parts := strings.Split(token[0], " ")
 	tokenString := parts[1]
 
-	
 	if len(parts) != 2 || parts[0] != "Bearer" {
 		return nil, status.Errorf(http.StatusUnauthorized, "Invalid Authorization Header Format")
 	}
@@ -64,12 +63,12 @@ func AuthInterceptor(ctx context.Context) (context.Context, error) {
 
 func ListenAndServeGrpc(controller pb.MerchantServiceServer) {
 	port := os.Getenv("GRPC_PORT")
-	
-	lis, err := net.Listen("tcp", "0.0.0.0:" + port)
+
+	lis, err := net.Listen("tcp", "localhost:"+port)
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			UnaryAuthInterceptor,
