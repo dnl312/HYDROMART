@@ -20,7 +20,7 @@ func Echo(e *echo.Echo, uc controller.AuthController, mc controller.MerchantCont
 		merchants.PUT("/products/:product_id", mc.UpdateProduct)
 		merchants.DELETE("/products/:product_id", mc.DeleteProduct)
 		merchants.GET("/orders", mc.ShowAllOrders)
-		// merchants.POST("/orders/:id", mc.UpdateOrder)
+		merchants.POST("/orders/:order_id", mc.ProcessOrder)
 	}
 
 }
