@@ -13,7 +13,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func main(){
+func main() {
 	e := echo.New()
 
 	e.Validator = &helpers.CustomValidator{NewValidator: validator.New()}
@@ -24,12 +24,16 @@ func main(){
 		log.Fatal("Error loading .env file")
 	}
 
-	authClientConn , authClient := config.InitAuthServiceClient()
+	authClientConn, authClient := config.InitAuthServiceClient()
 	defer authClientConn.Close()
 
 	authController := controller.NewAuthController(authClient)
-	
-	router.Echo(e, authController)
+
+	orderClientConn, orderClient := config.InitOrderServiceClient()
+	defer orderClientConn.Close()
+
+	orderController := controller.NewOrderController(orderClient)
+	router.Echo(e, authController, orderController)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
