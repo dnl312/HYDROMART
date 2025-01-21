@@ -1,4 +1,4 @@
-package user
+package main
 
 import (
 	"log"
@@ -9,7 +9,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func main() {
+func main(){
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file")
@@ -24,8 +24,8 @@ func main() {
 	log.Printf("Connected to database")
 	defer config.CloseDB()
 
-	userRepository := repo.NewUserRepository(db)
-	userController := controller.NewMerchantController(&userRepository)
+	userRepository := repo.NewOrderRepository(db)
+	userController := controller.NewOrderController(&userRepository)
 
 	config.ListenAndServeGrpc(&userController)
 }
