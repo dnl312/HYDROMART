@@ -26,7 +26,7 @@ func (u *UserRepository) GetProductByID(productID string) (*model.Product, error
 }
 
 func (u *UserRepository) CreateOrder(order *model.Transaction) error {
-	result := u.DB.Create(order)
+	result := u.DB.Create(&order)
 	if result != nil {
 		return result.Error
 	}
