@@ -4,16 +4,15 @@ import (
 	//pb "user/pb"
 	"context"
 	"user/model"
-	"user/pb"
+	pb "user/pb"
 	"user/repo"
 	"user/utils"
-
-	"gorm.io/gorm"
 )
 
 type User struct {
-	//pb.UnimplementedMerchantServiceServer
+	pb.UnimplementedOrderServer
 	Repository repo.UserInterface
+	Client     pb.GetUserServiceClient
 }
 
 func NewMerchantController(r repo.UserInterface) User {
@@ -46,8 +45,12 @@ func (u *User) CreateOrder(ctx context.Context, req *pb.CreateOrderRequest) (*pb
 
 	totalPrice := product.Price * float64(req.Qty)
 
-	userAmount := userClaims["amount"].(float64)
-	if userAmount < totalPrice {
+	userData, err := u.Client.GetUserByID(ctx, &pb.GetUserByIDRequest{UserId: req.UserId})
+	if err != nil {
+		return nil, err
+	}
+
+	if userData.Deposit < totalPrice {
 		return nil, err
 	}
 
@@ -69,31 +72,75 @@ func (u *User) CreateOrder(ctx context.Context, req *pb.CreateOrderRequest) (*pb
 	}, nil
 }
 
-func (u *User) DeleteOrder(ctx context.Context, req *pb.DeleteOrderRequest) (*pb.DeleteOrderRequest, error) {
-	token, err := utils.GetTokenStringFromContext(ctx)
+func (u *User) GetAllOrders(ctx context.Context, req *pb.GetAllOrdersRequest) (*pb.GetAllOrdersResponse, error) {
+	tokenString, err := utils.GetTokenStringFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	user, err := utils.RecoverUser(tokenString)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = utils.RecoverUser(token)
+	orderID := user["user_id"].(string)
+
+	allOrder, err := u.Repository.GetOrder(orderID)
 	if err != nil {
 		return nil, err
 	}
 
-	orderID := req.TransactionId
-
-	if orderID == "" {
-		return nil, err
+	allOrderResponse := pb.GetAllOrdersResponse{
+		Orders: []*pb.OrderResponse{},
 	}
 
-	err = u.Repository.DeleteOrder(orderID)
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, err
+	for _, order := range *allOrder {
+		orderResponse := pb.OrderResponse{
+			TransactionId: order.TransactionID,
+			UserId:        order.UserID,
+			ProductId:     order.ProductID,
+			Qty:           int32(order.Qty),
+			Amount:        float32(order.Amount),
+			Status:        order.Status,
 		}
+		allOrderResponse.Orders = append(allOrderResponse.Orders, &orderResponse)
+	}
+	return &allOrderResponse, nil
+}
+
+func (u *User) UpdateOrder(ctx context.Context, req *pb.UpdateOrderRequest) (*pb.UpdateOrderResponse, error) {
+	tokenString, err := utils.GetTokenStringFromContext(ctx)
+	if err != nil {
 		return nil, err
 	}
-	return &pb.CreateOrderResponse{
-		Message: "Transaction deleted successfully",
+	user, err := utils.RecoverUser(tokenString)
+	if err != nil {
+		return nil, err
+	}
+
+	orderID := user["user_id"].(string)
+
+	order := model.Transaction{
+		TransactionID: orderID,
+		ProductID:     req.ProductId,
+		Qty:           int(req.Qty),
+	}
+
+	err = u.Repository.UpdateOrder(&order)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.UpdateOrderResponse{
+		Message: "Order has been updated",
+	}, nil
+
+}
+
+func (u *User) DeleteOrder(ctx context.Context, req *pb.DeleteOrderRequest) (*pb.DeleteOrderResponse, error) {
+	err := u.Repository.DeleteOrder(req.TransactionId)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.DeleteOrderResponse{
+		Message: "Order delete succesfully",
 	}, nil
 }

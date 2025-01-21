@@ -29,11 +29,15 @@ func main() {
 
 	merchantClientConn, merchantClient := config.InitMerchantServiceClient()
 	defer merchantClientConn.Close()
+  
+  orderClientConn, orderClient := config.InitOrderServiceClient()
+	defer orderClientConn.Close()
 
+  orderController := controller.NewOrderController(orderClient)
+  merchantController := controller.NewMerchantController(merchantClient)
 	authController := controller.NewAuthController(authClient)
-	merchantController := controller.NewMerchantController(merchantClient)
-
-	router.Echo(e, authController, merchantController)
+  
+  router.Echo(e, authController, merchantController, orderController)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
