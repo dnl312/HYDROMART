@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"merchant/model"
 	pb "merchant/pb/merchantpb"
 	"merchant/repo"
@@ -29,6 +30,10 @@ func (m *Merchant) ShowAllProducts(ctx context.Context, req *pb.ShowAllProductRe
 	user, err := utils.RecoverUser(tokenString)
 	if err != nil {
 		return nil, err
+	}
+	userRole := user["role"].(string)
+	if userRole != "merchant" {
+		return nil, errors.New("user not a merchant")
 	}
 	merchantID := user["user_id"].(string)
 
@@ -64,6 +69,10 @@ func (m *Merchant) AddProduct(ctx context.Context, req *pb.AddProductRequest) (*
 	if err != nil {
 		return nil, err
 	}
+	userRole := user["role"].(string)
+	if userRole != "merchant" {
+		return nil, errors.New("user not a merchant")
+	}
 	merchantID := user["user_id"].(string)
 
 	product := model.Product{
@@ -93,6 +102,10 @@ func (m *Merchant) UpdateProduct(ctx context.Context, req *pb.UpdateProductReque
 	if err != nil {
 		return nil, err
 	}
+	userRole := user["role"].(string)
+	if userRole != "merchant" {
+		return nil, errors.New("user not a merchant")
+	}
 	merchantID := user["user_id"].(string)
 
 	product := model.Product{
@@ -114,7 +127,21 @@ func (m *Merchant) UpdateProduct(ctx context.Context, req *pb.UpdateProductReque
 }
 
 func (m *Merchant) DeleteProduct(ctx context.Context, req *pb.DeleteProductRequest) (*pb.DeleteProductResponse, error) {
-	err := m.Repository.DeleteProduct(req.ProductId)
+	tokenString, err := utils.GetTokenStringFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	user, err := utils.RecoverUser(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	userRole := user["role"].(string)
+	if userRole != "merchant" {
+		return nil, errors.New("user not a merchant")
+	}
+	merchantID := user["user_id"].(string)
+
+	err = m.Repository.DeleteProduct(req.ProductId, merchantID)
 	if err != nil {
 		return nil, err
 	}

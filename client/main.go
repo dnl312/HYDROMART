@@ -30,11 +30,8 @@ func main() {
 	merchantClientConn, merchantClient := config.InitMerchantServiceClient()
 	defer merchantClientConn.Close()
 
-	orderClientConn, orderClient := config.InitOrderServiceClient()
-	defer orderClientConn.Close()
-
 	authController := controller.NewAuthController(authClient)
-	merchantController := controller.NewMerchantController(merchantClient, orderClient)
+	merchantController := controller.NewMerchantController(merchantClient)
 
 	router.Echo(e, authController, merchantController)
 

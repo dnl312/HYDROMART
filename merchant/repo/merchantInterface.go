@@ -7,5 +7,5 @@ type MerchantInterface interface {
 	GetAllProduct(string) (*[]model.Product, error)
 	AddProduct(*model.Product) error
 	UpdateProduct(*model.Product) error
-	DeleteProduct(string) error
+	DeleteProduct(string, string) error
 }
