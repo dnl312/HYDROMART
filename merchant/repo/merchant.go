@@ -37,7 +37,7 @@ func (u *MerchantRepository) AddProduct(productPtr *model.Product) error {
 }
 
 func (u *MerchantRepository) UpdateProduct(productPtr *model.Product) error {
-	result := u.DB.Save(productPtr)
+	result := u.DB.Where("merchant_id = ?", productPtr.MerchantID).Save(productPtr)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -45,8 +45,8 @@ func (u *MerchantRepository) UpdateProduct(productPtr *model.Product) error {
 	return nil
 }
 
-func (u *MerchantRepository) DeleteProduct(productID string) error {
-	result := u.DB.Where("product_id = ?", productID).Delete(&model.Product{})
+func (u *MerchantRepository) DeleteProduct(productID, merchantID string) error {
+	result := u.DB.Where("product_id = ?", productID).Where("merchant_id = ?", merchantID).Delete(&model.Product{})
 	if result.Error != nil {
 		return result.Error
 	}

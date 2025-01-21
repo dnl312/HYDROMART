@@ -10,7 +10,7 @@ import (
 )
 
 func InitOrderServiceClient() (*grpc.ClientConn, pb.OrderServiceClient) {
-	conn, err := grpc.Dial(os.Getenv("MERCHANT_SERVICE_URI"), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial(os.Getenv("USER_SERVICE_URI"), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
