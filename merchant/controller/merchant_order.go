@@ -19,7 +19,7 @@ func NewMerchantOrderController(r repo.MerchantInterface) MerchantOrder {
 	return MerchantOrder{}
 }
 
-func (mc MerchantOrder) ShowAllOrders(ctx context.Context, req pb.ShowAllOrderRequest) (*pb.ShowAllOrderResponse, error) {
+func (mc MerchantOrder) ShowAllOrders(ctx context.Context, req *pb.ShowAllOrderRequest) (*pb.ShowAllOrderResponse, error) {
 	tokenString, err := utils.GetTokenStringFromContext(ctx)
 	if err != nil {
 		return nil, err
@@ -96,6 +96,13 @@ func (mc MerchantOrder) ProcessOrder(ctx context.Context, req *pb.ProcessOrderRe
 		log.Printf("could not process order: %v", err)
 		return err
 	}
+
+	err = utils.SendMail("hydromart@admin.com", order.UserId, order.ProductId, order.Qty, order.Amount)
+	if err != nil {
+		log.Printf("could not send email %v", err)
+		return err
+	}
+
 	log.Printf("process Response: %v", r)
 
 	return nil
