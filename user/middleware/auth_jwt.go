@@ -8,13 +8,13 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"user/model"
 
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -68,41 +68,18 @@ func CustomJWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func GetUserIDFromToken(c echo.Context) (model.User, error) {
-	userToken := c.Get("user")
-	if userToken == nil {
-		return model.User{}, errors.New("user token is missing from context")
-	}
+func GetTokenStringFromContext(ctx context.Context) (string, error) {
+    md, ok := metadata.FromIncomingContext(ctx)
+    if !ok {
+        return "", errors.New("metadata is not provided")
+    }
 
-	token, ok := userToken.(*jwt.Token)
-	if !ok {
-		return model.User{}, errors.New("invalid token format")
-	}
+    tokens := md["authorization"]
+    if len(tokens) == 0 {
+        return "", errors.New("authorization token is not provided")
+    }
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || !token.Valid {
-		return model.User{}, errors.New("invalid or malformed token claims")
-	}
-
-	// Extract userID
-	user := model.User{
-		UserID: claims["user_id"].(string),
-		Role: claims["role"].(string),
-		Email: claims["email"].(string),
-	}
-
-	_, ok = claims["user_id"].(string)
-	if !ok {
-		return model.User{}, errors.New("User ID not found or invalid in token claims")
-	}
-	_, ok = claims["role"].(string)
-	if !ok {
-		return model.User{}, errors.New("Role not found or invalid in token claims")
-	}
-	_, ok = claims["email"].(string)
-	if !ok {
-		return model.User{}, errors.New("Email not found or invalid in token claims")
-	}
-
-	return user, nil
+    parts := strings.Split(tokens[0], " ")
+	tokenString := parts[1]
+	return tokenString, nil
 }

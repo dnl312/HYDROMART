@@ -4,7 +4,9 @@ import "user/model"
 
 type UserInterface interface {
 	// list method
-	GetProductByID(id string) (*model.Product, error)
-	CreateOrder(order *model.Transaction) error
+	ValidateUser(uuid string) (model.User, error)
+	UpdateDeposit(order model.Transaction) error
+	GetProductByID(id string) (model.Product, error)
+	CreateOrder(order model.Transaction) error
 	DeleteOrder(orderID string) error
 }

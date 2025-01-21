@@ -18,13 +18,13 @@ import (
 )
 
 func UnaryAuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	excludedMethods := map[string]bool{
-		"/repo.MerchantService/UpdateMerchantStatus": true,
-	}
+	// excludedMethods := map[string]bool{
+	// 	"/repo.MerchantService/UpdateMerchantStatus": true,
+	// }
 
-	if _, ok := excludedMethods[info.FullMethod]; ok {
-		return handler(ctx, req)
-	}
+	// if _, ok := excludedMethods[info.FullMethod]; ok {
+	// 	return handler(ctx, req)
+	// }
 
 	ctx, err := AuthInterceptor(ctx)
 	if err != nil {
@@ -32,6 +32,31 @@ func UnaryAuthInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	}
 	return handler(ctx, req)
 }
+
+// func UnaryAuthInterceptor(
+//     ctx context.Context,
+//     req interface{},
+//     info *grpc.UnaryServerInfo,
+//     handler grpc.UnaryHandler,
+// ) (interface{}, error) {
+//     md, ok := metadata.FromIncomingContext(ctx)
+//     if !ok {
+//         return nil, status.Errorf(codes.Unauthenticated, "metadata is not provided")
+//     }
+
+//     tokens := md["authorization"]
+//     if len(tokens) == 0 {
+//         return nil, status.Errorf(codes.Unauthenticated, "authorization token is not provided")
+//     }
+
+//     // Add token to context for downstream handlers
+//     ctx = context.WithValue(ctx, "authorization", tokens[0])
+//     return handler(ctx, req)
+// }
+
+type contextKey string
+
+const authorizationKey contextKey = "authorization"
 
 func AuthInterceptor(ctx context.Context) (context.Context, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -44,7 +69,7 @@ func AuthInterceptor(ctx context.Context) (context.Context, error) {
 	log.Printf("Metadata received: %v", md)
 
 	authHeader, ok := md["authorization"]
-	if !ok || len(authHeader) == 0 {
+	if (!ok || len(authHeader) == 0) {
 		return nil, status.Errorf(codes.Unauthenticated, "authorization token is not provided")
 	}
 
@@ -58,6 +83,7 @@ func AuthInterceptor(ctx context.Context) (context.Context, error) {
 	}
 
 	log.Println("Token validated successfully with value:", tokenString)
+	ctx = context.WithValue(ctx, authorizationKey, tokenString)
 	return ctx, nil
 }
 
