@@ -50,14 +50,27 @@ func (u *UserRepository) CreateOrder(order model.Transaction) error {
 	return nil
 }
 
+func (u *UserRepository) GetOrder(userID string) (*[]model.Transaction, error) {
+	var Order []model.Transaction
+	result := u.DB.Where("user_id = ?", userID).Find(&Order)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &Order, nil
+}
+
+func (u *UserRepository) UpdateOrder(order *model.Transaction) error {
+	result := u.DB.Save(order)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
 func (u *UserRepository) DeleteOrder(orderID string) error {
 	result := u.DB.Table("transactions_hydromart").Where("transaction_id = ? AND status = ? ", orderID, "ORDER CREATED").Delete(&model.Transaction{})
 	if result.Error != nil {
 		return result.Error
-	}
-
-	if result.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound
 	}
 
 	return nil

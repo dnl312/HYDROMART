@@ -5,14 +5,16 @@ package order;
 option go_package = "/pb;pb";
 
 service OrderService {
-    rpc ShowAllOrders(ShowAllOrderRequest) returns (ShowAllOrderResponse) {}
+    rpc ShowAllOrdersByMerchant(ShowAllOrdersByMerchantRequest) returns (ShowAllOrdersByMerchantResponse) {}
+    rpc GetOrderById(GetOrderByIdRequest) returns (Order) {}
     rpc UpdateOrder(UpdateOrderRequest) returns (UpdateOrderResponse) {}
 }
 
-message ShowAllOrderRequest {
+message ShowAllOrdersByMerchantRequest {
+    string merchant_id = 1;
 }
 
-message ShowAllOrderResponse {
+message ShowAllOrdersByMerchantResponse {
     repeated Order orders = 1;
 }
 
@@ -25,8 +27,17 @@ message Order {
 	string status = 6;
 }
 
+message GetOrderByIdRequest {
+    string order_id = 1;
+}
+
 message UpdateOrderRequest {
     string order_id = 1;
+    string  user_id = 2;
+    string  product_id = 3;
+	int32  qty = 4;
+	double amount = 5;
+	string status = 6;
 }
 
 message UpdateOrderResponse {

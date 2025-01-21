@@ -3,35 +3,23 @@ package controller
 import (
 	"client/model"
 	pb "client/pb/merchantpb"
-	opb "client/pb/orderpb"
 	"context"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc/metadata"
 )
 
 type MerchantController struct {
-	Client      pb.MerchantServiceClient
-	OrderClient opb.OrderServiceClient
+	Client pb.MerchantServiceClient
 }
 
-func NewMerchantController(client pb.MerchantServiceClient, orderClient opb.OrderServiceClient) MerchantController {
+func NewMerchantController(client pb.MerchantServiceClient) MerchantController {
 	return MerchantController{
-		Client:      client,
-		OrderClient: orderClient,
+		Client: client,
 	}
-}
-
-// custom jwt claim
-type jwtCustomClaims struct {
-	ID    string `json:"user_id"`
-	Email string `json:"email"`
-	Role  string `json:"role"`
-	jwt.RegisteredClaims
 }
 
 func (mc MerchantController) ShowAllProducts(ctx echo.Context) error {
@@ -146,33 +134,32 @@ func (mc MerchantController) ShowAllOrders(ctx echo.Context) error {
 	serviceCtx, cancel := context.WithTimeout(ctxWithToken, 10*time.Second)
 	defer cancel()
 
-	r, err := mc.OrderClient.ShowAllOrders(serviceCtx, &opb.ShowAllOrderRequest{})
+	r, err := mc.Client.ShowAllOrders(serviceCtx, &pb.ShowAllOrderRequest{})
 	if err != nil {
 		log.Printf("could not show all orders: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "show all orders error"})
 	}
-	log.Printf("show all product Response: %v", r)
+	log.Printf("show all order Response: %v", r)
 
 	return ctx.JSON(http.StatusOK, r)
 }
 
-func (mc MerchantController) UpdateOrder(ctx echo.Context) error {
-	token := ctx.Get("Authorization").(*jwt.Token)
-	claims := token.Claims.(*jwtCustomClaims)
+func (mc MerchantController) ProcessOrder(ctx echo.Context) error {
+	token := ctx.Request().Header.Get("Authorization")
+	md := metadata.Pairs("Authorization", token)
+	ctxWithToken := metadata.NewOutgoingContext(context.Background(), md)
 
-	if claims.Role != "merchant" {
-		return ctx.JSON(http.StatusUnauthorized, "unauthorized")
-	}
-
-	serviceCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	serviceCtx, cancel := context.WithTimeout(ctxWithToken, 10*time.Second)
 	defer cancel()
 
-	r, err := mc.OrderClient.UpdateOrder(serviceCtx, &opb.UpdateOrderRequest{})
+	r, err := mc.Client.ProcessOrder(serviceCtx, &pb.ProcessOrderRequest{
+		OrderId: ctx.Param("order_id"),
+	})
 	if err != nil {
 		log.Printf("could not update order: %v", err)
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "show all orders error"})
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "couldn't update product id"})
 	}
-	log.Printf("update order Response: %v", r)
+	log.Printf("update process order response: %v", r)
 
 	return ctx.JSON(http.StatusOK, r)
 }

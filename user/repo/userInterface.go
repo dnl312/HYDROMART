@@ -1,6 +1,8 @@
 package repo
 
-import "user/model"
+import (
+	"user/model"
+)
 
 type UserInterface interface {
 	// list method

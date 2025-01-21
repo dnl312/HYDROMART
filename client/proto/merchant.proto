@@ -9,6 +9,9 @@ service MerchantService {
     rpc AddProduct(AddProductRequest) returns (AddProductResponse) {}
     rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse) {}
     rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse) {}
+
+    rpc ShowAllOrders(ShowAllOrderRequest) returns (ShowAllOrderResponse) {}
+    rpc ProcessOrder(ProcessOrderRequest) returns (ProcessOrderResponse) {}
 }
 
 message ShowAllProductRequest {
@@ -48,5 +51,29 @@ message DeleteProductRequest {
 }
 
 message DeleteProductResponse {
+    string message = 1;
+}
+
+message ShowAllOrderRequest {
+}
+
+message ShowAllOrderResponse {
+    repeated Order orders = 1;
+}
+
+message Order {
+    string order_id = 1;
+    string  user_id = 2;
+    string  product_id = 3;
+	int32  qty = 4;
+	double amount = 5;
+	string status = 6;
+}
+
+message ProcessOrderRequest {
+    string order_id = 1;
+}
+
+message ProcessOrderResponse {
     string message = 1;
 }
