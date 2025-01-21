@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"log"
 	"user/model"
 
 	"gorm.io/gorm"
@@ -50,17 +51,57 @@ func (u *UserRepository) CreateOrder(order model.Transaction) error {
 	return nil
 }
 
-func (u *UserRepository) GetOrder(userID string) (*[]model.Transaction, error) {
-	var Order []model.Transaction
-	result := u.DB.Where("user_id = ?", userID).Find(&Order)
-	if result.Error != nil {
-		return nil, result.Error
+func (u *UserRepository) GetOrder(userID string, status string) (*[]model.TransactionLs, error) {
+	var Order []model.TransactionLs
+	if status != "" {
+		log.Println("status not empty")
+		rows, err := u.DB.Table("transactions_hydromart").Where("user_id = ? AND status = ?", userID, status).Rows()
+	
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var order model.TransactionLs
+			if err := u.DB.ScanRows(rows, &order); err != nil {
+				return nil, err
+			}
+			Order = append(Order, order)
+		}
+	}else{
+		rows, err := u.DB.Table("transactions_hydromart").Where("user_id = ?", userID).Rows()
+	
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var order model.TransactionLs
+			if err := u.DB.ScanRows(rows, &order); err != nil {
+				return nil, err
+			}
+			Order = append(Order, order)
+		}
 	}
+
 	return &Order, nil
 }
 
-func (u *UserRepository) UpdateOrder(order *model.Transaction) error {
-	result := u.DB.Save(order)
+func (u *UserRepository) GetOrderByID(orderID string) (model.Transaction, error) {
+	var order model.Transaction
+	result := u.DB.Table("transactions_hydromart").Where("transaction_id = ?", orderID).First(&order)
+	if result.Error != nil {
+		return model.Transaction{}, result.Error
+	}
+	return order, nil
+}
+
+func (u *UserRepository) UpdateOrder(order model.Transaction) error {
+	result := u.DB.Table("transactions_hydromart").Where("transaction_id = ?", order.TransactionID).Updates(map[string]interface{}{
+		"qty": order.Qty,
+	})
 	if result.Error != nil {
 		return result.Error
 	}
