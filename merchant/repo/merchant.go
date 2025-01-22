@@ -28,6 +28,17 @@ func (u *MerchantRepository) GetAllProduct(merchantID string) (*[]model.Product,
 	return &products, nil
 }
 
+func (u *MerchantRepository) GetProductByID(productID string) (*model.Product, error) {
+	var product model.Product
+
+	result := u.DB.Table("products_hydromart").Where("product_id = ?", productID).First(&product)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &product, nil
+}
+
 func (u *MerchantRepository) AddProduct(productPtr *model.Product) error {
 	result := u.DB.Table("products_hydromart").Create(productPtr)
 	if result.Error != nil {

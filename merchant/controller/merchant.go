@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
 	"merchant/model"
 	pb "merchant/pb/merchantpb"
 	"merchant/repo"
@@ -13,12 +15,14 @@ import (
 
 type Merchant struct {
 	pb.UnimplementedMerchantServiceServer
-	Repository repo.MerchantInterface
+	merchantRepo repo.MerchantInterface
+	orderRepo    repo.OrderInterface
 }
 
-func NewMerchantController(r repo.MerchantInterface) Merchant {
+func NewMerchantController(mr repo.MerchantInterface, or repo.OrderInterface) Merchant {
 	return Merchant{
-		Repository: r,
+		merchantRepo: mr,
+		orderRepo:    or,
 	}
 }
 
@@ -37,7 +41,7 @@ func (m *Merchant) ShowAllProducts(ctx context.Context, req *pb.ShowAllProductRe
 	}
 	merchantID := user["user_id"].(string)
 
-	allProduct, err := m.Repository.GetAllProduct(merchantID)
+	allProduct, err := m.merchantRepo.GetAllProduct(merchantID)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +87,7 @@ func (m *Merchant) AddProduct(ctx context.Context, req *pb.AddProductRequest) (*
 		Stock:       int(req.Product.Stock),
 		Category:    req.Product.Category,
 	}
-	err = m.Repository.AddProduct(&product)
+	err = m.merchantRepo.AddProduct(&product)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +120,7 @@ func (m *Merchant) UpdateProduct(ctx context.Context, req *pb.UpdateProductReque
 		Stock:       int(req.Product.Stock),
 		Category:    req.Product.Category,
 	}
-	err = m.Repository.UpdateProduct(&product)
+	err = m.merchantRepo.UpdateProduct(&product)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +145,7 @@ func (m *Merchant) DeleteProduct(ctx context.Context, req *pb.DeleteProductReque
 	}
 	merchantID := user["user_id"].(string)
 
-	err = m.Repository.DeleteProduct(req.ProductId, merchantID)
+	err = m.merchantRepo.DeleteProduct(req.ProductId, merchantID)
 	if err != nil {
 		return nil, err
 	}
@@ -149,4 +153,124 @@ func (m *Merchant) DeleteProduct(ctx context.Context, req *pb.DeleteProductReque
 	return &pb.DeleteProductResponse{
 		Message: "product has been deleted",
 	}, nil
+}
+
+func (mc Merchant) ShowAllOrders(ctx context.Context, req *pb.ShowAllOrderRequest) (*pb.ShowAllOrderResponse, error) {
+	tokenString, err := utils.GetTokenStringFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	user, err := utils.RecoverUser(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	userRole := user["role"].(string)
+	if userRole != "MERCHANT" {
+		return nil, errors.New("user not a merchant")
+	}
+	merchantID := user["user_id"].(string)
+
+	productIds, err := mc.GetProductIDs(merchantID)
+	if err != nil {
+		return nil, err
+	}
+
+	r, err := mc.orderRepo.GetOrderByProductID(productIds)
+	if err != nil {
+		log.Printf("could not show all orders: %v", err)
+		return nil, err
+	}
+	log.Printf("show all order Response: %v", r)
+
+	allOrderResponse := pb.ShowAllOrderResponse{
+		Orders: []*pb.Order{},
+	}
+	for _, order := range *r {
+		orderResponse := pb.Order{
+			OrderId:   order.TransactionID,
+			UserId:    order.UserID,
+			ProductId: order.ProductID,
+			Qty:       int32(order.Qty),
+			Amount:    order.Amount,
+			Status:    order.Status,
+		}
+		allOrderResponse.Orders = append(allOrderResponse.Orders, &orderResponse)
+	}
+
+	return &allOrderResponse, nil
+}
+
+func (mc Merchant) GetProductIDs(merchantID string) ([]string, error) {
+	allProduct, err := mc.merchantRepo.GetAllProduct(merchantID)
+	if err != nil {
+		return nil, err
+	}
+
+	allProductIds := []string{}
+	for _, product := range *allProduct {
+		allProductIds = append(allProductIds, product.ProductID)
+	}
+
+	return allProductIds, nil
+}
+
+func (mc Merchant) ProcessOrder(ctx context.Context, req *pb.ProcessOrderRequest) (*pb.ProcessOrderResponse, error) {
+	tokenString, err := utils.GetTokenStringFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	user, err := utils.RecoverUser(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	userRole := user["role"].(string)
+	if userRole != "MERCHANT" {
+		return nil, errors.New("user not a merchant")
+	}
+	merchantID := user["user_id"].(string)
+
+	fmt.Printf("\n\n\n%s\n\n\n", req.OrderId)
+
+	order, err := mc.orderRepo.GetOrderByID(req.OrderId)
+	if err != nil {
+		log.Printf("could not process order: %v", err)
+		return nil, err
+	}
+
+	product, err := mc.merchantRepo.GetProductByID(order.ProductID)
+	if err != nil {
+		log.Printf("could not process order: %v", err)
+		return nil, err
+	}
+
+	if merchantID != product.MerchantID {
+		return nil, errors.New("merchant don't own the product")
+	}
+
+	err = mc.orderRepo.UpdateOrderStatus(model.Transaction{
+		TransactionID: order.TransactionID,
+		UserID:        order.UserID,
+		ProductID:     order.ProductID,
+		Qty:           order.Qty,
+		Amount:        order.Amount,
+		Status:        "PROCESSED",
+	})
+	if err != nil {
+		log.Printf("could not process order: %v", err)
+		return nil, err
+	}
+
+	customer, err := mc.orderRepo.GetUserByID(order.UserID)
+	if err != nil {
+		log.Printf("could not process order: %v", err)
+		return nil, err
+	}
+
+	err = utils.SendMail("hydromart@admin.com", customer.Email, order.ProductID, order.Qty, order.Amount)
+	if err != nil {
+		log.Printf("could not send email %v", err)
+		return nil, err
+	}
+
+	return &pb.ProcessOrderResponse{Message: "order processed"}, nil
 }

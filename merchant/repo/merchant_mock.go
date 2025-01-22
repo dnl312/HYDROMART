@@ -26,6 +26,17 @@ func (m *MerchantRepositoryMock) GetAllProduct(id string) (*[]model.Product, err
 	return &productList, nil
 }
 
+func (m *MerchantRepositoryMock) GetProductByID(id string) (*model.Product, error) {
+	res := m.Mock.Called(id)
+
+	if res.Get(0) == nil {
+		return nil, errors.New("user id not found")
+	}
+
+	product := res.Get(0).(model.Product)
+	return &product, nil
+}
+
 // AddUser inserts user to database mock
 func (m *MerchantRepositoryMock) AddProduct(userPtr *model.Product) error {
 	res := m.Mock.Called(userPtr)
