@@ -14,4 +14,5 @@ type UserInterface interface {
 	CreateOrder(order model.Transaction) error
 	DeleteOrder(orderID string) error
 	UpdateOrder(order model.Transaction) error
+	InsertIntoTopUpTemp(topup_id string, user_id string) error 
 }

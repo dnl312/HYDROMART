@@ -53,12 +53,7 @@ func (m *MockOrderRepository) UpdateOrder(order model.Transaction) error{
 	return args.Error(0)
 }
 
-
-
-	
-	// // GetOrder(userID string, status string) (*[]model.TransactionLs, error)
-	// // GetOrderByID(orderID string) (model.Transaction, error)
-	// //GetProductByID(id string) (model.Product, error)
-	// CreateOrder(order model.Transaction) error
-	// DeleteOrder(orderID string) error
-	// UpdateOrder(order model.Transaction) error
+func (m *MockOrderRepository) InsertIntoTopUpTemp(topup_id string, user_id string) error{
+	args := m.Called(topup_id, user_id)
+	return args.Error(0)
+}

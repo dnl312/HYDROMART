@@ -4,6 +4,7 @@ import (
 	"log"
 	"user/model"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -110,6 +111,19 @@ func (u *UserRepository) UpdateOrder(order model.Transaction) error {
 
 func (u *UserRepository) DeleteOrder(orderID string) error {
 	result := u.DB.Table("transactions_hydromart").Where("transaction_id = ? AND status = ? ", orderID, "ORDER CREATED").Delete(&model.Transaction{})
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (u *UserRepository) InsertIntoTopUpTemp(topup_id string, user_id string) error {
+	result := u.DB.Table("topup_temp_hydromart").Create(&model.UserTopUp{
+		TempID: uuid.New().String(),
+		OrderID: topup_id,
+		UserID: user_id,
+	})
 	if result.Error != nil {
 		return result.Error
 	}

@@ -9,6 +9,7 @@ service Order {
     rpc GetAllOrdersWithStatus(GetAllOrdersWithStatusRequest) returns (GetAllOrdersWithStatusResponse) {}
     rpc UpdateOrder(UpdateOrderRequest) returns (UpdateOrderResponse) {}
     rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse) {}
+    rpc CreateTopUp(TopUpUserDepositRequest) returns (TopUpUserDepositResponse) {}
 }
 
 message CreateOrderRequest {
@@ -58,4 +59,13 @@ message DeleteOrderRequest {
 
 message DeleteOrderResponse {
     string message = 1;
+}
+
+message TopUpUserDepositRequest {
+    float amount = 1;
+}
+
+message TopUpUserDepositResponse {
+    string token = 1;
+    string redirect_url = 2;
 }
