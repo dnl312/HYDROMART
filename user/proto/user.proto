@@ -10,6 +10,7 @@ service Order {
     rpc UpdateOrder(UpdateOrderRequest) returns (UpdateOrderResponse) {}
     rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse) {}
     rpc CreateTopUp(TopUpUserDepositRequest) returns (TopUpUserDepositResponse) {}
+    rpc SchedulerUpdateDeposit(SchedulerUpdateDepositRequest) returns (SchedulerUpdateDepositResponse) {}
 }
 
 message CreateOrderRequest {
@@ -68,4 +69,11 @@ message TopUpUserDepositRequest {
 message TopUpUserDepositResponse {
     string token = 1;
     string redirect_url = 2;
+}
+
+message SchedulerUpdateDepositRequest {
+}
+
+message SchedulerUpdateDepositResponse {
+    string message = 1;
 }

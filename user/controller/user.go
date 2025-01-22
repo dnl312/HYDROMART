@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 	"user/middleware"
@@ -263,4 +264,49 @@ func (u *User) CreateTopUp(ctx context.Context, req *pb.TopUpUserDepositRequest)
 		Token:        midtransResponse.Token,
 		RedirectUrl: midtransResponse.RedirectUrl,
 	}, nil
+}
+
+func (u *User) SchedulerUpdateDeposit(ctx context.Context, req *pb.SchedulerUpdateDepositRequest) (*pb.SchedulerUpdateDepositResponse, error) {
+	topupTemp, err := u.Repository.GetTopUpTempWaitting()
+	if err != nil {
+		return &pb.SchedulerUpdateDepositResponse{}, err
+	}
+
+	for _, temp := range *topupTemp {
+		newUrl := os.Getenv("MIDTRANS_URL_API")+"/v2/" + temp.OrderID + "/status"
+		headers := map[string]string{
+			"authorization":  os.Getenv("MIDTRANS_APIKEY"),
+		}
+
+		res, err := utils.RequestGET(newUrl, headers)
+		if err != nil {
+			return &pb.SchedulerUpdateDepositResponse{}, err
+		}
+
+		var result model.TopupStatus
+		err = json.Unmarshal(res, &result)
+		if err != nil {
+			return &pb.SchedulerUpdateDepositResponse{}, err
+		}
+
+		grossAmount, err := strconv.ParseFloat(result.GrossAmount, 64)
+		if err != nil {
+			return &pb.SchedulerUpdateDepositResponse{}, err
+		}
+		if err != nil {
+			return &pb.SchedulerUpdateDepositResponse{}, err
+		}
+
+		err = u.Repository.UpdateDepositUser(temp.UserID, grossAmount)
+		if err != nil {
+			return &pb.SchedulerUpdateDepositResponse{}, err
+		}
+
+		err = u.Repository.UpdateTopUpTemp(temp.OrderID)
+		if err != nil {
+			return &pb.SchedulerUpdateDepositResponse{}, err
+		}
+	}
+	
+	return &pb.SchedulerUpdateDepositResponse{}, nil
 }

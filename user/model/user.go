@@ -9,9 +9,3 @@ type User struct {
 	Role     string  `gorm:"not null"`
 	Deposit  float64 `gorm:"not null"`
 }
-
-type UserTopUp struct {
-	TempID string `gorm:"unique"`
-	OrderID string `gorm:"unique"`
-	UserID string `gorm:"not null"`
-}

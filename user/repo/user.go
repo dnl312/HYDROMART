@@ -130,3 +130,37 @@ func (u *UserRepository) InsertIntoTopUpTemp(topup_id string, user_id string) er
 
 	return nil
 }
+
+func (u *UserRepository) GetTopUpTempWaitting() (*[]model.UserTopUp, error) {
+	var topup []model.UserTopUp
+	rows, err := u.DB.Table("topup_temp_hydromart").Where("status = ?", "WAITING").Rows()
+	if err != nil {
+			return nil, err
+		}
+	defer rows.Close()
+
+	for rows.Next() {
+		var topupDtl model.UserTopUp
+			if err := u.DB.ScanRows(rows, &topupDtl); err != nil {
+				return nil, err
+			}
+			topup = append(topup, topupDtl)
+	}
+	return &topup, nil
+}
+
+func (u *UserRepository) UpdateDepositUser(user_id string, amount float64) error {
+	result := u.DB.Table("users_hydromart").Where("user_id = ?", user_id).Update("deposit", gorm.Expr("deposit + ?", amount))
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func (u *UserRepository) UpdateTopUpTemp(topup_id string) error {
+	result := u.DB.Table("topup_temp_hydromart").Where("order_id = ?", topup_id).Update("status", "SUCCESS")
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}

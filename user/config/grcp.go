@@ -18,6 +18,14 @@ import (
 )
 
 func UnaryAuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	excludedMethods := map[string]bool{
+		"/user.Order/SchedulerUpdateDeposit": true,
+	}
+
+	if _, ok := excludedMethods[info.FullMethod]; ok {
+		return handler(ctx, req)
+	}
+
 	ctx, err := AuthInterceptor(ctx)
 	if err != nil {
 		return nil, err
