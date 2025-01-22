@@ -53,7 +53,41 @@ func (u AuthController) RegisterUser (ctx echo.Context) error{
 	serviceCtx, cancel:= context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	r, err := u.Client.RegisterUser(serviceCtx, &pb.RegisterRequest{Username: req.Username, Password: req.Password})
+	r, err := u.Client.RegisterUser(serviceCtx, &pb.RegisterRequest{
+		Username: req.Username, 
+		Password: req.Password, 
+		Email: req.Email,
+		Address: req.Address,
+		Role: "USER",
+	})
+	if err != nil {
+		log.Printf("could not register: %v", err)
+		log.Printf("could not register: %v", req)
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "registration failed"})
+	}
+	log.Printf("Register Response: %s", r.GetMessage())
+
+	return ctx.JSON(http.StatusCreated, map[string]string{
+		"message": r.Message,
+	})
+}
+
+func (u AuthController) RegisterMerchant (ctx echo.Context) error{
+	var req model.RegisterUser
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid request parameters"})
+	}
+
+	serviceCtx, cancel:= context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	r, err := u.Client.RegisterUser(serviceCtx, &pb.RegisterRequest{
+		Username: req.Username, 
+		Password: req.Password, 
+		Email: req.Email,
+		Address: req.Address,
+		Role: "MERCHANT",
+	})
 	if err != nil {
 		log.Printf("could not register: %v", err)
 		log.Printf("could not register: %v", req)

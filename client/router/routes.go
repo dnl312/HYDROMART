@@ -11,6 +11,7 @@ import (
 	{
 		users.POST("/login", uc.LoginUser)
 		users.POST("/register", uc.RegisterUser)
+		users.POST("/register/merchant", uc.RegisterMerchant)
 	}
   
   orders := e.Group("/orders")
