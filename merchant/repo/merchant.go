@@ -38,9 +38,15 @@ func (u *MerchantRepository) AddProduct(productPtr *model.Product) error {
 }
 
 func (u *MerchantRepository) UpdateProduct(productPtr *model.Product) error {
-	result := u.DB.Table("products_hydromart").Where("merchant_id = ?", productPtr.MerchantID).Save(productPtr)
+	result := u.DB.Table("products_hydromart").
+		Where("product_id = ?", productPtr.ProductID).
+		Where("merchant_id = ?", productPtr.MerchantID).
+		Updates(productPtr)
 	if result.Error != nil {
 		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("product not found")
 	}
 
 	return nil
