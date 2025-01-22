@@ -289,22 +289,24 @@ func (u *User) SchedulerUpdateDeposit(ctx context.Context, req *pb.SchedulerUpda
 			return &pb.SchedulerUpdateDepositResponse{}, err
 		}
 
-		grossAmount, err := strconv.ParseFloat(result.GrossAmount, 64)
-		if err != nil {
-			return &pb.SchedulerUpdateDepositResponse{}, err
-		}
-		if err != nil {
-			return &pb.SchedulerUpdateDepositResponse{}, err
-		}
+		if result.StatusCode == "200"{
+			grossAmount, err := strconv.ParseFloat(result.GrossAmount, 64)
+			if err != nil {
+				return &pb.SchedulerUpdateDepositResponse{}, err
+			}
+			if err != nil {
+				return &pb.SchedulerUpdateDepositResponse{}, err
+			}
 
-		err = u.Repository.UpdateDepositUser(temp.UserID, grossAmount)
-		if err != nil {
-			return &pb.SchedulerUpdateDepositResponse{}, err
-		}
+			err = u.Repository.UpdateDepositUser(temp.UserID, grossAmount)
+			if err != nil {
+				return &pb.SchedulerUpdateDepositResponse{}, err
+			}
 
-		err = u.Repository.UpdateTopUpTemp(temp.OrderID)
-		if err != nil {
-			return &pb.SchedulerUpdateDepositResponse{}, err
+			err = u.Repository.UpdateTopUpTemp(temp.OrderID)
+			if err != nil {
+				return &pb.SchedulerUpdateDepositResponse{}, err
+			}
 		}
 	}
 	
