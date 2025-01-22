@@ -32,7 +32,7 @@ func (m *Merchant) ShowAllProducts(ctx context.Context, req *pb.ShowAllProductRe
 		return nil, err
 	}
 	userRole := user["role"].(string)
-	if userRole != "merchant" {
+	if userRole != "MERCHANT" {
 		return nil, errors.New("user not a merchant")
 	}
 	merchantID := user["user_id"].(string)
@@ -70,7 +70,7 @@ func (m *Merchant) AddProduct(ctx context.Context, req *pb.AddProductRequest) (*
 		return nil, err
 	}
 	userRole := user["role"].(string)
-	if userRole != "merchant" {
+	if userRole != "MERCHANT" {
 		return nil, errors.New("user not a merchant")
 	}
 	merchantID := user["user_id"].(string)
@@ -103,7 +103,7 @@ func (m *Merchant) UpdateProduct(ctx context.Context, req *pb.UpdateProductReque
 		return nil, err
 	}
 	userRole := user["role"].(string)
-	if userRole != "merchant" {
+	if userRole != "MERCHANT" {
 		return nil, errors.New("user not a merchant")
 	}
 	merchantID := user["user_id"].(string)
@@ -136,7 +136,7 @@ func (m *Merchant) DeleteProduct(ctx context.Context, req *pb.DeleteProductReque
 		return nil, err
 	}
 	userRole := user["role"].(string)
-	if userRole != "merchant" {
+	if userRole != "MERCHANT" {
 		return nil, errors.New("user not a merchant")
 	}
 	merchantID := user["user_id"].(string)

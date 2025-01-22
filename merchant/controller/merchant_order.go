@@ -29,7 +29,7 @@ func (mc MerchantOrder) ShowAllOrders(ctx context.Context, req *pb.ShowAllOrderR
 		return nil, err
 	}
 	userRole := user["role"].(string)
-	if userRole != "merchant" {
+	if userRole != "MERCHANT" {
 		return nil, errors.New("user not a merchant")
 	}
 	merchantID := user["user_id"].(string)
@@ -69,7 +69,7 @@ func (mc MerchantOrder) ProcessOrder(ctx context.Context, req *pb.ProcessOrderRe
 		return err
 	}
 	userRole := user["role"].(string)
-	if userRole != "merchant" {
+	if userRole != "MERCHANT" {
 		return errors.New("user not a merchant")
 	}
 	merchantID := user["user_id"].(string)
@@ -90,7 +90,7 @@ func (mc MerchantOrder) ProcessOrder(ctx context.Context, req *pb.ProcessOrderRe
 		ProductId: order.ProductId,
 		Qty:       order.Qty,
 		Amount:    order.Amount,
-		Status:    "processed",
+		Status:    "PROCESSED",
 	})
 	if err != nil {
 		log.Printf("could not process order: %v", err)
