@@ -157,7 +157,7 @@ func (mc MerchantController) ProcessOrder(ctx echo.Context) error {
 	})
 	if err != nil {
 		log.Printf("could not update order: %v", err)
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "couldn't update product id"})
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "couldn't process order"})
 	}
 	log.Printf("update process order response: %v", r)
 

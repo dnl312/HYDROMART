@@ -8,6 +8,7 @@ import (
 	"merchant/model"
 	pb "merchant/pb/merchantpb"
 	"merchant/repo"
+	"merchant/service"
 	"merchant/utils"
 
 	"github.com/google/uuid"
@@ -17,12 +18,14 @@ type Merchant struct {
 	pb.UnimplementedMerchantServiceServer
 	merchantRepo repo.MerchantInterface
 	orderRepo    repo.OrderInterface
+	Mb         service.MessageBroker
 }
 
-func NewMerchantController(mr repo.MerchantInterface, or repo.OrderInterface) Merchant {
+func NewMerchantController(mr repo.MerchantInterface, or repo.OrderInterface, mb service.MessageBroker) Merchant {
 	return Merchant{
 		merchantRepo: mr,
 		orderRepo:    or,
+		Mb:         mb,
 	}
 }
 
@@ -266,7 +269,7 @@ func (mc Merchant) ProcessOrder(ctx context.Context, req *pb.ProcessOrderRequest
 		return nil, err
 	}
 
-	err = utils.SendMail("hydromart@admin.com", customer.Email, order.ProductID, order.Qty, order.Amount)
+	err = utils.SendMail("hydromart@admin.com", customer.Email, order.ProductID, order.Qty, order.Amount, mc.Mb)
 	if err != nil {
 		log.Printf("could not send email %v", err)
 		return nil, err

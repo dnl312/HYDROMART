@@ -1,16 +1,21 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"merchant/service"
 	"os"
 	"strconv"
 
 	_ "github.com/joho/godotenv/autoload"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	gomail "gopkg.in/mail.v2"
 )
 
 // SendMail sends top up link message
-func SendMail(senderMail, destinationMail, ProductID string, quantity int, amount float64) error {
+func SendMail(senderMail, destinationMail, ProductID string, quantity int, amount float64, mb service.MessageBroker) error {
 	// Create a new message
 	message := gomail.NewMessage()
 
@@ -34,6 +39,30 @@ func SendMail(senderMail, destinationMail, ProductID string, quantity int, amoun
 		
     `, ProductID, quantity, amount,
 	))
+
+	emailDetails := struct {
+		SenderMail      string  `json:"sender_mail"`
+		DestinationMail string  `json:"destination_mail"`
+		ProductID       string  `json:"product_id"`
+		Quantity        int     `json:"quantity"`
+		Amount          float64 `json:"amount"`
+	}{
+		SenderMail:      senderMail,
+		DestinationMail: destinationMail,
+		ProductID:       ProductID,
+		Quantity:        quantity,
+		Amount:          amount,
+	}
+
+	dataJson, err := json.Marshal(emailDetails)
+	if err != nil {
+		log.Printf("error marshalling email details: %v", err)
+		return status.Error(codes.Internal, err.Error())
+	}
+
+	if err := mb.PublishMessage(dataJson); err != nil {
+		return err
+	}
 
 	// Set up the SMTP dialer
 	mailtrapPort, err := strconv.Atoi(os.Getenv("MAILTRAP_PORT"))
