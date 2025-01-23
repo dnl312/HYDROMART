@@ -3,8 +3,11 @@ package router
 import (
 	"client/controller"
 	"client/middleware"
+	"fmt"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/robfig/cron/v3"
 )
 
 func Echo(e *echo.Echo, uc controller.AuthController, mc controller.MerchantController, oc controller.OrderController) {
@@ -22,20 +25,21 @@ func Echo(e *echo.Echo, uc controller.AuthController, mc controller.MerchantCont
 		orders.GET("/order-list", oc.GetAllOrders)
 		orders.PUT("/order-update", oc.UpdateOrder)
 		orders.DELETE("/order-delete", oc.DeleteOrder)
+		orders.POST("/topup", oc.TopUp)
 	}
 
-	// e.GET("/orders/update-deposit", oc.UpdateDepositCron)
-	// c := cron.New()
-	// _, err := c.AddFunc("@every 5s", func() {
-	// 	_, err := http.Get("http://localhost:8080/orders/update-deposit")
-	// 	if err != nil {
-	// 		fmt.Println("Error triggering update-deposit endpoint:", err)
-	// 	}
-	// })
-	// if err != nil {
-	// 	fmt.Println("Error setting up cron job:", err)
-	// }
-	// c.Start()
+	e.GET("/orders/update-deposit", oc.UpdateDepositCron)
+	c := cron.New()
+	_, err := c.AddFunc("@every 5s", func() {
+		_, err := http.Get("http://localhost:8080/orders/update-deposit")
+		if err != nil {
+			fmt.Println("Error triggering update-deposit endpoint:", err)
+		}
+	})
+	if err != nil {
+		fmt.Println("Error setting up cron job:", err)
+	}
+	c.Start()
 
 	merchants := e.Group("/merchants")
 	merchants.Use(middleware.RequireAuth)
