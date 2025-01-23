@@ -18,13 +18,13 @@ import (
 )
 
 func UnaryAuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	// excludedMethods := map[string]bool{
-	// 	"/repo.MerchantService/UpdateMerchantStatus": true,
-	// }
+	excludedMethods := map[string]bool{
+		"/user.Order/SchedulerUpdateDeposit": true,
+	}
 
-	// if _, ok := excludedMethods[info.FullMethod]; ok {
-	// 	return handler(ctx, req)
-	// }
+	if _, ok := excludedMethods[info.FullMethod]; ok {
+		return handler(ctx, req)
+	}
 
 	ctx, err := AuthInterceptor(ctx)
 	if err != nil {
@@ -32,27 +32,6 @@ func UnaryAuthInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	}
 	return handler(ctx, req)
 }
-
-// func UnaryAuthInterceptor(
-//     ctx context.Context,
-//     req interface{},
-//     info *grpc.UnaryServerInfo,
-//     handler grpc.UnaryHandler,
-// ) (interface{}, error) {
-//     md, ok := metadata.FromIncomingContext(ctx)
-//     if !ok {
-//         return nil, status.Errorf(codes.Unauthenticated, "metadata is not provided")
-//     }
-
-//     tokens := md["authorization"]
-//     if len(tokens) == 0 {
-//         return nil, status.Errorf(codes.Unauthenticated, "authorization token is not provided")
-//     }
-
-//     // Add token to context for downstream handlers
-//     ctx = context.WithValue(ctx, "authorization", tokens[0])
-//     return handler(ctx, req)
-// }
 
 type contextKey string
 

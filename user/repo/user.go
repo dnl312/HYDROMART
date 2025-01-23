@@ -4,6 +4,7 @@ import (
 	"log"
 	"user/model"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -114,5 +115,52 @@ func (u *UserRepository) DeleteOrder(orderID string) error {
 		return result.Error
 	}
 
+	return nil
+}
+
+func (u *UserRepository) InsertIntoTopUpTemp(topup_id string, user_id string) error {
+	result := u.DB.Table("topup_temp_hydromart").Create(&model.UserTopUp{
+		TempID: uuid.New().String(),
+		OrderID: topup_id,
+		UserID: user_id,
+	})
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (u *UserRepository) GetTopUpTempWaitting() (*[]model.UserTopUp, error) {
+	var topup []model.UserTopUp
+	rows, err := u.DB.Table("topup_temp_hydromart").Where("status = ?", "WAITING").Rows()
+	if err != nil {
+			return nil, err
+		}
+	defer rows.Close()
+
+	for rows.Next() {
+		var topupDtl model.UserTopUp
+			if err := u.DB.ScanRows(rows, &topupDtl); err != nil {
+				return nil, err
+			}
+			topup = append(topup, topupDtl)
+	}
+	return &topup, nil
+}
+
+func (u *UserRepository) UpdateDepositUser(user_id string, amount float64) error {
+	result := u.DB.Table("users_hydromart").Where("user_id = ?", user_id).Update("deposit", gorm.Expr("deposit + ?", amount))
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func (u *UserRepository) UpdateTopUpTemp(topup_id string) error {
+	result := u.DB.Table("topup_temp_hydromart").Where("order_id = ?", topup_id).Update("status", "SUCCESS")
+	if result.Error != nil {
+		return result.Error
+	}
 	return nil
 }

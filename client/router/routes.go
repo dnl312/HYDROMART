@@ -11,6 +11,7 @@ func Echo(e *echo.Echo, uc controller.AuthController, mc controller.MerchantCont
 	{
 		users.POST("/login", uc.LoginUser)
 		users.POST("/register", uc.RegisterUser)
+		users.POST("/register/merchant", uc.RegisterMerchant)
 	}
 
 	orders := e.Group("/orders")
