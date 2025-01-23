@@ -5,6 +5,7 @@ import (
 	"merchant/config"
 	"merchant/controller"
 	"merchant/repo"
+	"merchant/service"
 
 	"github.com/joho/godotenv"
 )
@@ -21,12 +22,18 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
+
+	conn, mbChan := config.InitMessageBroker()
+	defer conn.Close()
+	
+	messageBrokerService := service.NewMessageBroker(mbChan)
+
 	config.ClearPreparedStatements()
 	log.Printf("Connected to database")
 	defer config.CloseDB()
 	merchantRepository := repo.NewMerchantRepository(db)
 	orderRepository := repo.NewOrderRepository(db)
-	merchantController := controller.NewMerchantController(&merchantRepository, &orderRepository)
+	merchantController := controller.NewMerchantController(&merchantRepository, &orderRepository, messageBrokerService)
 
 	config.ListenAndServeGrpc(&merchantController)
 }

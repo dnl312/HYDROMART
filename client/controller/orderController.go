@@ -123,6 +123,29 @@ func (u OrderController) UpdateOrder(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, r)
 }
 
+func (u OrderController) TopUp(ctx echo.Context) error {
+	var req model.TopUp
+	if err := ctx.Bind(&req); err != nil {
+		log.Print(err)
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid request parameters"})
+	}
+	token := ctx.Request().Header.Get("Authorization")
+	md := metadata.Pairs("Authorization", token)
+	ctxWithToken := metadata.NewOutgoingContext(context.Background(), md)
+
+	serviceCtx, cancel := context.WithTimeout(ctxWithToken, 10*time.Second)
+	defer cancel()
+
+	r, err := u.Client.CreateTopUp(serviceCtx, &pb.TopUpUserDepositRequest{Amount: float32(req.Amount)})
+	if err != nil {
+		log.Printf("could not top up: %v", err)
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "top up error"})
+	}
+	log.Printf("top up Response: %v", r)
+
+	return ctx.JSON(http.StatusOK, r)
+}
+
 func (u OrderController) UpdateDepositCron(ctx echo.Context) error {
 	token := ctx.Request().Header.Get("Authorization")
 	md := metadata.Pairs("Authorization", token)

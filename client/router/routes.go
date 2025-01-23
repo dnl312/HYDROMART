@@ -22,6 +22,7 @@ func Echo(e *echo.Echo, uc controller.AuthController, mc controller.MerchantCont
 		orders.GET("/order-list", oc.GetAllOrders)
 		orders.PUT("/order-update", oc.UpdateOrder)
 		orders.DELETE("/order-delete", oc.DeleteOrder)
+		orders.POST("/topup", oc.TopUp)
 	}
 
 	// e.GET("/orders/update-deposit", oc.UpdateDepositCron)
