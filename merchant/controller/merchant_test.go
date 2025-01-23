@@ -12,7 +12,7 @@ import (
 )
 
 var merchantRepoMock = &repo.MerchantRepositoryMock{Mock: mock.Mock{}}
-var merchantServiceMock = Merchant{Repository: merchantRepoMock}
+var merchantServiceMock = Merchant{merchantRepo: merchantRepoMock}
 
 func TestShowAllProductsNoValidation(t *testing.T) {
 	token := ""

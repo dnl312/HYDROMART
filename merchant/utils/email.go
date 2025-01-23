@@ -10,7 +10,7 @@ import (
 )
 
 // SendMail sends top up link message
-func SendMail(senderMail, destinationMail, ProductID string, quantity int32, amount float64) error {
+func SendMail(senderMail, destinationMail, ProductID string, quantity int, amount float64) error {
 	// Create a new message
 	message := gomail.NewMessage()
 
@@ -26,9 +26,9 @@ func SendMail(senderMail, destinationMail, ProductID string, quantity int32, amo
                 <h1>Transaction Processed</h1>
                 <p>The following order has been processed by our merchant.</p>
 				<p><strong>Product ID: </strong> %s<br>
-				<strong>Quantity: </strong><a href="%d">payment-link</a></p>
-				<strong>Amount: </strong><a href="%.2f">payment-link</a></p>
-                <p>Thank you,<br>Book Rent</p>
+				<strong>Quantity: </strong>%d</p>
+				<strong>Amount: </strong>$%.2f</a></p>
+                <p>Thank you,<br>HydroMart</p>
             </body>
         </html>
 		
