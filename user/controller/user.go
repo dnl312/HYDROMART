@@ -72,28 +72,28 @@ func (u *User) GetAllOrdersWithStatus(ctx context.Context, req *pb.GetAllOrdersW
 func (u *User) CreateOrder(ctx context.Context, req *pb.CreateOrderRequest) (*pb.CreateOrderResponse, error) {
 	token, err := middleware.GetTokenStringFromContext(ctx)
 	if err != nil {
-		return &pb.CreateOrderResponse{Message: "not authorized",}, nil
+		return &pb.CreateOrderResponse{Message: "not authorized",}, err
 	}
 
 	userClaims, err := utils.RecoverUser(token)
 	if err != nil {
-		return &pb.CreateOrderResponse{Message: "JWT failed",}, nil
+		return &pb.CreateOrderResponse{Message: "JWT failed",}, err
 	}
 
 	product, err := u.Repository.GetProductByID(req.ProductId)
 	if err != nil || err == gorm.ErrRecordNotFound {
-		return &pb.CreateOrderResponse{Message: "product not found",}, nil
+		return &pb.CreateOrderResponse{Message: "product not found",}, err
 	}
 
 	totalPrice := product.Price * float64(req.Qty)
 
 	user, err := u.Repository.ValidateUser(userClaims.UserID)
 	if err != nil || err == gorm.ErrRecordNotFound {
-		return &pb.CreateOrderResponse{Message: "user not found",}, nil
+		return &pb.CreateOrderResponse{Message: "user not found",}, err
 	}
 
 	if user.Deposit < totalPrice {
-		return &pb.CreateOrderResponse{Message: "user's deposit is low, please top up",},nil
+		return &pb.CreateOrderResponse{Message: "user's deposit is low, please top up",}, err
 	}
 
 	order := model.Transaction{
@@ -109,12 +109,12 @@ func (u *User) CreateOrder(ctx context.Context, req *pb.CreateOrderRequest) (*pb
 
 	err = u.Repository.CreateOrder(order)
 	if err != nil {
-		return &pb.CreateOrderResponse{Message: "Create order failed",},nil
+		return &pb.CreateOrderResponse{Message: "Create order failed",}, err
 	}
 
 	err = u.Repository.UpdateDeposit(order)
 	if err != nil {
-		return &pb.CreateOrderResponse{Message: "update user's deposit failed",}, nil
+		return &pb.CreateOrderResponse{Message: "update user's deposit failed",}, err
 	}
 
 	return &pb.CreateOrderResponse{
@@ -125,53 +125,53 @@ func (u *User) CreateOrder(ctx context.Context, req *pb.CreateOrderRequest) (*pb
 func (u *User) DeleteOrder(ctx context.Context, req *pb.DeleteOrderRequest) (*pb.DeleteOrderResponse, error) {
 	token, err := utils.GetTokenStringFromContext(ctx)
 	if err != nil {
-		return &pb.DeleteOrderResponse{Message: "not authorized",}, nil
+		return &pb.DeleteOrderResponse{Message: "not authorized",}, err
 	}
 
 	_, err = utils.RecoverUser(token)
 	if err != nil {
-		return &pb.DeleteOrderResponse{Message: "JWT failed",}, nil
+		return &pb.DeleteOrderResponse{Message: "JWT failed",}, err
 	}
 
 	orderID := req.TransactionId
 
 	if orderID == "" {
-		return &pb.DeleteOrderResponse{Message: "transaction id not found",}, nil
+		return &pb.DeleteOrderResponse{Message: "transaction id not found",}, err
 	}
 
 	err = u.Repository.DeleteOrder(orderID)
 	if err != nil || err == gorm.ErrRecordNotFound {
-		return &pb.DeleteOrderResponse{Message: "transaction not found",}, nil
+		return &pb.DeleteOrderResponse{Message: "transaction not found",}, err
 	}
-	return &pb.DeleteOrderResponse{Message: "Order deleted successfully",}, nil
+	return &pb.DeleteOrderResponse{Message: "Order deleted successfully",}, err
 }
 
 func (u *User) UpdateOrder (ctx context.Context, req *pb.UpdateOrderRequest) (*pb.UpdateOrderResponse, error) {
 	token, err := utils.GetTokenStringFromContext(ctx)
 	if err != nil {
-		return &pb.UpdateOrderResponse{Message: "not authorized",}, nil
+		return &pb.UpdateOrderResponse{Message: "not authorized",}, err
 	}
 
 	user, err := utils.RecoverUser(token)
 	if err != nil {
-		return &pb.UpdateOrderResponse{Message: "JWT failed",}, nil
+		return &pb.UpdateOrderResponse{Message: "JWT failed",}, err
 	}
 
 	trx, err := u.Repository.GetOrderByID(req.TransactionId)
 	if err != nil || err == gorm.ErrRecordNotFound {
-		return &pb.UpdateOrderResponse{Message: "transaction not found",}, nil
+		return &pb.UpdateOrderResponse{Message: "transaction not found",}, err
 	}
 
 	product, err := u.Repository.GetProductByID(trx.ProductID)
 	if err != nil || err == gorm.ErrRecordNotFound {
-		return &pb.UpdateOrderResponse{Message: "product not found",}, nil
+		return &pb.UpdateOrderResponse{Message: "product not found",}, err
 	}
 
 	totalPrice := product.Price * float64(req.Qty)
 
 	userClaims, err := u.Repository.ValidateUser(user.UserID)
 	if err != nil || err == gorm.ErrRecordNotFound {
-		return &pb.UpdateOrderResponse{Message: "user not found",}, nil
+		return &pb.UpdateOrderResponse{Message: "user not found",}, err
 	}
 
 	if userClaims.Deposit < totalPrice {
@@ -198,11 +198,11 @@ func (u *User) UpdateOrder (ctx context.Context, req *pb.UpdateOrderRequest) (*p
 
 		err = u.Repository.UpdateDeposit(order)
 		if err != nil {
-			return &pb.UpdateOrderResponse{Message: "update user's deposit failed",}, nil
+			return &pb.UpdateOrderResponse{Message: "update user's deposit failed",}, err
 		}
 	}
 
-	return &pb.UpdateOrderResponse{Message: "Order updated successfully",}, nil
+	return &pb.UpdateOrderResponse{Message: "Order updated successfully",}, err
 }
 
 func (u *User) CreateTopUp(ctx context.Context, req *pb.TopUpUserDepositRequest) (*pb.TopUpUserDepositResponse, error) {

@@ -110,10 +110,18 @@ func (u *UserRepository) UpdateOrder(order model.Transaction) error {
 }
 
 func (u *UserRepository) DeleteOrder(orderID string) error {
-	result := u.DB.Table("transactions_hydromart").Where("transaction_id = ? AND status = ? ", orderID, "ORDER CREATED").Delete(&model.Transaction{})
+	var transaction model.Transaction
+	result := u.DB.Table("transactions_hydromart").Where("transaction_id = ?", orderID).First(&transaction)
 	if result.Error != nil {
 		return result.Error
 	}
+
+	result = u.DB.Table("transactions_hydromart").Where("transaction_id = ? AND status = ? ", orderID, "ORDER CREATED").Delete(&model.Transaction{})
+	if result.Error != nil {
+		return result.Error
+	}
+
+	u.UpdateDepositUser(transaction.UserID, transaction.Amount)
 
 	return nil
 }

@@ -43,7 +43,7 @@ func (u OrderController) CreateOrder(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "create order error"})
 	}
 	return ctx.JSON(http.StatusOK, map[string]string{
-		"message": "Order created succes",
+		"message": "Order created success",
 	})
 }
 
@@ -55,8 +55,14 @@ func (u OrderController) DeleteOrder(ctx echo.Context) error {
 	serviceCtx, cancel := context.WithTimeout(ctxWithToken, 10*time.Second)
 	defer cancel()
 
+	var req model.DeleteOrder
+	if err := ctx.Bind(&req); err != nil {
+		log.Print(err)
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid request parameters"})
+	}
+
 	r, err := u.Client.DeleteOrder(serviceCtx, &pb.DeleteOrderRequest{
-		TransactionId: ctx.Param("transaction_id"),
+		TransactionId: req.TransactionID,
 	})
 
 	if err != nil {
@@ -77,7 +83,13 @@ func (u OrderController) GetAllOrders(ctx echo.Context) error {
 	serviceCtx, cancel := context.WithTimeout(ctxWithToken, 10*time.Second)
 	defer cancel()
 
-	r, err := u.Client.GetAllOrdersWithStatus(serviceCtx, &pb.GetAllOrdersWithStatusRequest{Status: ctx.Param("status")})
+	var req pb.GetAllOrdersWithStatusRequest
+	if err := ctx.Bind(&req); err != nil {
+		log.Print(err)
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid request parameters"})
+	}
+
+	r, err := u.Client.GetAllOrdersWithStatus(serviceCtx, &pb.GetAllOrdersWithStatusRequest{Status: req.Status})
 	if err != nil {
 		log.Printf("could not show all order: %v", err)
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "show all order error"})
@@ -89,7 +101,7 @@ func (u OrderController) GetAllOrders(ctx echo.Context) error {
 
 
 func (u OrderController) UpdateOrder(ctx echo.Context) error {
-	var req model.Transaction
+	var req model.UpdateOrder
 	if err := ctx.Bind(&req); err != nil {
 		log.Print(err)
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid request parameters"})
