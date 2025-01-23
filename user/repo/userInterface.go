@@ -14,4 +14,8 @@ type UserInterface interface {
 	CreateOrder(order model.Transaction) error
 	DeleteOrder(orderID string) error
 	UpdateOrder(order model.Transaction) error
+	InsertIntoTopUpTemp(topup_id string, user_id string) error 
+	GetTopUpTempWaitting() (*[]model.UserTopUp, error) 
+	UpdateDepositUser(user_id string, amount float64) error 
+	UpdateTopUpTemp(topup_id string) error
 }

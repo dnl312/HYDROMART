@@ -23,6 +23,8 @@ const (
 	Order_GetAllOrdersWithStatus_FullMethodName = "/user.Order/GetAllOrdersWithStatus"
 	Order_UpdateOrder_FullMethodName            = "/user.Order/UpdateOrder"
 	Order_DeleteOrder_FullMethodName            = "/user.Order/DeleteOrder"
+	Order_CreateTopUp_FullMethodName            = "/user.Order/CreateTopUp"
+	Order_SchedulerUpdateDeposit_FullMethodName = "/user.Order/SchedulerUpdateDeposit"
 )
 
 // OrderClient is the client API for Order service.
@@ -33,6 +35,8 @@ type OrderClient interface {
 	GetAllOrdersWithStatus(ctx context.Context, in *GetAllOrdersWithStatusRequest, opts ...grpc.CallOption) (*GetAllOrdersWithStatusResponse, error)
 	UpdateOrder(ctx context.Context, in *UpdateOrderRequest, opts ...grpc.CallOption) (*UpdateOrderResponse, error)
 	DeleteOrder(ctx context.Context, in *DeleteOrderRequest, opts ...grpc.CallOption) (*DeleteOrderResponse, error)
+	CreateTopUp(ctx context.Context, in *TopUpUserDepositRequest, opts ...grpc.CallOption) (*TopUpUserDepositResponse, error)
+	SchedulerUpdateDeposit(ctx context.Context, in *SchedulerUpdateDepositRequest, opts ...grpc.CallOption) (*SchedulerUpdateDepositResponse, error)
 }
 
 type orderClient struct {
@@ -83,6 +87,26 @@ func (c *orderClient) DeleteOrder(ctx context.Context, in *DeleteOrderRequest, o
 	return out, nil
 }
 
+func (c *orderClient) CreateTopUp(ctx context.Context, in *TopUpUserDepositRequest, opts ...grpc.CallOption) (*TopUpUserDepositResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TopUpUserDepositResponse)
+	err := c.cc.Invoke(ctx, Order_CreateTopUp_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orderClient) SchedulerUpdateDeposit(ctx context.Context, in *SchedulerUpdateDepositRequest, opts ...grpc.CallOption) (*SchedulerUpdateDepositResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SchedulerUpdateDepositResponse)
+	err := c.cc.Invoke(ctx, Order_SchedulerUpdateDeposit_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrderServer is the server API for Order service.
 // All implementations must embed UnimplementedOrderServer
 // for forward compatibility.
@@ -91,6 +115,8 @@ type OrderServer interface {
 	GetAllOrdersWithStatus(context.Context, *GetAllOrdersWithStatusRequest) (*GetAllOrdersWithStatusResponse, error)
 	UpdateOrder(context.Context, *UpdateOrderRequest) (*UpdateOrderResponse, error)
 	DeleteOrder(context.Context, *DeleteOrderRequest) (*DeleteOrderResponse, error)
+	CreateTopUp(context.Context, *TopUpUserDepositRequest) (*TopUpUserDepositResponse, error)
+	SchedulerUpdateDeposit(context.Context, *SchedulerUpdateDepositRequest) (*SchedulerUpdateDepositResponse, error)
 	mustEmbedUnimplementedOrderServer()
 }
 
@@ -112,6 +138,12 @@ func (UnimplementedOrderServer) UpdateOrder(context.Context, *UpdateOrderRequest
 }
 func (UnimplementedOrderServer) DeleteOrder(context.Context, *DeleteOrderRequest) (*DeleteOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteOrder not implemented")
+}
+func (UnimplementedOrderServer) CreateTopUp(context.Context, *TopUpUserDepositRequest) (*TopUpUserDepositResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTopUp not implemented")
+}
+func (UnimplementedOrderServer) SchedulerUpdateDeposit(context.Context, *SchedulerUpdateDepositRequest) (*SchedulerUpdateDepositResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SchedulerUpdateDeposit not implemented")
 }
 func (UnimplementedOrderServer) mustEmbedUnimplementedOrderServer() {}
 func (UnimplementedOrderServer) testEmbeddedByValue()               {}
@@ -206,6 +238,42 @@ func _Order_DeleteOrder_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Order_CreateTopUp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TopUpUserDepositRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServer).CreateTopUp(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Order_CreateTopUp_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServer).CreateTopUp(ctx, req.(*TopUpUserDepositRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Order_SchedulerUpdateDeposit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SchedulerUpdateDepositRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServer).SchedulerUpdateDeposit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Order_SchedulerUpdateDeposit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServer).SchedulerUpdateDeposit(ctx, req.(*SchedulerUpdateDepositRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Order_ServiceDesc is the grpc.ServiceDesc for Order service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +296,14 @@ var Order_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteOrder",
 			Handler:    _Order_DeleteOrder_Handler,
+		},
+		{
+			MethodName: "CreateTopUp",
+			Handler:    _Order_CreateTopUp_Handler,
+		},
+		{
+			MethodName: "SchedulerUpdateDeposit",
+			Handler:    _Order_SchedulerUpdateDeposit_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
