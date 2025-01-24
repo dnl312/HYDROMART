@@ -1,0 +1,220 @@
+basePath: /
+definitions:
+  model.AddProductRequest:
+    properties:
+      category:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      stock:
+        type: integer
+    type: object
+  model.Product:
+    properties:
+      category:
+        type: string
+      merchantID:
+        type: string
+      price:
+        type: number
+      productID:
+        type: string
+      productName:
+        type: string
+      stock:
+        type: integer
+    type: object
+  pb.ShowAllOrderRequest:
+    type: object
+  pb.ShowAllProductRequest:
+    type: object
+host: https://merchant-hydromart-586770996636.asia-southeast2.run.app/
+info:
+  contact:
+    email: hydromart@admin.com
+    name: Hydromart Team
+  description: Hacktiv8 Phase 3 Final Project
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: HydroMart
+  version: "1.0"
+paths:
+  /merchant/orders:
+    get:
+      consumes:
+      - application/json
+      description: Show All Orders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.ShowAllOrderRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Show All Orders
+      tags:
+      - merchant
+  /merchant/orders/{order_id}:
+    put:
+      consumes:
+      - application/json
+      description: Process Orders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.ShowAllOrderRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Process Orders
+      tags:
+      - merchant
+  /merchant/products:
+    get:
+      consumes:
+      - application/json
+      description: Show All Products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.ShowAllProductRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Show All Products
+      tags:
+      - merchant
+    post:
+      consumes:
+      - application/json
+      description: Add Products
+      parameters:
+      - description: add product request
+        in: body
+        name: addproduct-data
+        required: true
+        schema:
+          $ref: '#/definitions/model.AddProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Add Products
+      tags:
+      - merchant
+  /merchant/products/{product_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Delete Products
+      tags:
+      - merchant
+    post:
+      consumes:
+      - application/json
+      description: Update Products
+      parameters:
+      - description: update product request
+        in: body
+        name: updateproduct-data
+        required: true
+        schema:
+          $ref: '#/definitions/model.Product'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Update Products
+      tags:
+      - merchant
+swagger: "2.0"
