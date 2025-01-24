@@ -1,0 +1,575 @@
+basePath: /
+definitions:
+  model.AddProductRequest:
+    properties:
+      category:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      stock:
+        type: integer
+    type: object
+  model.CreateOrder:
+    properties:
+      product_id:
+        type: string
+      qty:
+        type: integer
+    required:
+    - product_id
+    - qty
+    type: object
+  model.DeleteOrder:
+    properties:
+      transaction_id:
+        type: string
+    required:
+    - transaction_id
+    type: object
+  model.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  model.Product:
+    properties:
+      category:
+        type: string
+      merchantID:
+        type: string
+      price:
+        type: number
+      productID:
+        type: string
+      productName:
+        type: string
+      stock:
+        type: integer
+    type: object
+  model.RegisterUser:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+    required:
+    - address
+    - email
+    - password
+    - role
+    - username
+    type: object
+  model.TopUp:
+    properties:
+      amount:
+        type: number
+    required:
+    - amount
+    type: object
+  model.UpdateOrder:
+    properties:
+      qty:
+        type: integer
+      transaction_id:
+        type: string
+    required:
+    - qty
+    - transaction_id
+    type: object
+  pb.ShowAllOrderRequest:
+    type: object
+  pb.ShowAllProductRequest:
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: hydromart@admin.com
+    name: Hydromart Team
+  description: Hacktiv8 Phase 3 Final Project
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: HydroMart
+  version: "1.0"
+paths:
+  /merchant/orders:
+    get:
+      consumes:
+      - application/json
+      description: Show All Orders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.ShowAllOrderRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Show All Orders
+      tags:
+      - merchant
+  /merchant/orders/{order_id}:
+    put:
+      consumes:
+      - application/json
+      description: Process Orders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.ShowAllOrderRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Process Orders
+      tags:
+      - merchant
+  /merchant/products:
+    get:
+      consumes:
+      - application/json
+      description: Show All Products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.ShowAllProductRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Show All Products
+      tags:
+      - merchant
+    post:
+      consumes:
+      - application/json
+      description: Add Products
+      parameters:
+      - description: add product request
+        in: body
+        name: addproduct-data
+        required: true
+        schema:
+          $ref: '#/definitions/model.AddProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Add Products
+      tags:
+      - merchant
+  /merchant/products/{product_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Delete Products
+      tags:
+      - merchant
+    post:
+      consumes:
+      - application/json
+      description: Update Products
+      parameters:
+      - description: update product request
+        in: body
+        name: updateproduct-data
+        required: true
+        schema:
+          $ref: '#/definitions/model.Product'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Update Products
+      tags:
+      - merchant
+  /orders/create:
+    post:
+      consumes:
+      - application/json
+      description: Create new order
+      parameters:
+      - description: User Order Create
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateOrder'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create new order
+      tags:
+      - Order
+  /orders/order-delete:
+    delete:
+      consumes:
+      - application/json
+      description: Delete order
+      parameters:
+      - description: User Order Delete
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.DeleteOrder'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete order
+      tags:
+      - Order
+  /orders/order-list:
+    get:
+      consumes:
+      - application/json
+      description: Get all orders
+      parameters:
+      - description: Order status
+        in: query
+        name: status
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all orders
+      tags:
+      - Order
+  /orders/order-update:
+    put:
+      consumes:
+      - application/json
+      description: Update order
+      parameters:
+      - description: User Order Update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateOrder'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update order
+      tags:
+      - Order
+  /orders/topup:
+    post:
+      consumes:
+      - application/json
+      description: Top up user deposit
+      parameters:
+      - description: User Top Up
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.TopUp'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Top up user deposit
+      tags:
+      - Order
+  /orders/update-deposit:
+    get:
+      consumes:
+      - application/json
+      description: Update deposit cron
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update deposit cron
+      tags:
+      - Order
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Login a user
+      parameters:
+      - description: User login details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login a user
+      tags:
+      - User
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with the role 'USER'
+      parameters:
+      - description: User registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.RegisterUser'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - User
+  /users/register/merchant:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with the role 'MERCHANT'
+      parameters:
+      - description: User registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.RegisterUser'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - User
+swagger: "2.0"

@@ -22,6 +22,15 @@ func NewAuthController(client pb.AuthServiceClient) AuthController {
 	}
 }
 
+// @Summary     Login a user
+// @Description Login a user
+// @Tags        User
+// @Accept      json
+// @Produce     json
+// @Param       request body model.LoginRequest true "User login details"
+// @Success     200 {object} map[string]string
+// @Failure     500 {object} map[string]string
+// @Router      /users/login [post]
 func (u AuthController) LoginUser (ctx echo.Context) error{
 		var req model.LoginRequest
 		if err := ctx.Bind(&req); err != nil {
@@ -44,6 +53,15 @@ func (u AuthController) LoginUser (ctx echo.Context) error{
 		})
 }
 
+// @Summary     Register a new user
+// @Description Register a new user with the role 'USER'
+// @Tags        User
+// @Accept      json
+// @Produce     json
+// @Param       request body model.RegisterUser true "User registration details"
+// @Success     201 {object} map[string]string
+// @Failure     500 {object} map[string]string
+// @Router      /users/register [post]
 func (u AuthController) RegisterUser (ctx echo.Context) error{
 	var req model.RegisterUser
 	if err := ctx.Bind(&req); err != nil {
@@ -72,6 +90,15 @@ func (u AuthController) RegisterUser (ctx echo.Context) error{
 	})
 }
 
+// @Summary     Register a new user
+// @Description Register a new user with the role 'MERCHANT'
+// @Tags        User
+// @Accept      json
+// @Produce     json
+// @Param       request body model.RegisterUser true "User registration details"
+// @Success     201 {object} map[string]string
+// @Failure     500 {object} map[string]string
+// @Router      /users/register/merchant [post]
 func (u AuthController) RegisterMerchant (ctx echo.Context) error{
 	var req model.RegisterUser
 	if err := ctx.Bind(&req); err != nil {
